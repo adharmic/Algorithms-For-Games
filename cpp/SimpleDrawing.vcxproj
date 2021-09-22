@@ -91,10 +91,12 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="QuickHull.cpp" />
+    <ClCompile Include="Vector2D.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="basewin.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="Vector2D.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="input.rc" />
