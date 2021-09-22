@@ -1,0 +1,5 @@
+﻿  main.cpp
+C:\Users\Adithya\Documents\GitHub\Algorithms-For-Games\cpp\main.cpp(32,17): warning C4996: 'ID2D1Factory::GetDesktopDpi': Deprecated. Use DisplayInformation::LogicalDpi for Windows Store Apps or GetDpiForWindow for desktop apps.
+C:\Users\Adithya\Documents\GitHub\Algorithms-For-Games\cpp\main.cpp(162,65): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\Adithya\Documents\GitHub\Algorithms-For-Games\cpp\main.cpp(162,45): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+  SimpleDrawing.vcxproj -> C:\Users\Adithya\Documents\GitHub\Algorithms-For-Games\cpp\Debug\SimpleDrawing.exe

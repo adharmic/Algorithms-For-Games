@@ -2,6 +2,7 @@
 #include <Windowsx.h>
 #include <d2d1.h>
 
+#include <algorithm>
 #include <list>
 #include <memory>
 using namespace std;
@@ -18,6 +19,13 @@ template <class T> void SafeRelease(T **ppT)
         (*ppT)->Release();
         *ppT = NULL;
     }
+}
+
+template <typename T> list<T> splice(list<T>& v, int start, int end, const list<T>& ar) {
+    list<T> result(begin(v) + start, begin(v) + start + end);
+    v.erase(begin(v) + start, begin(v) + start + end);
+    v.insert(begin(v) + start, begin(ar), end(ar));
+    return result;
 }
 
 class DPIScale
@@ -114,6 +122,9 @@ class MainWindow : public BaseWindow<MainWindow>
     void    ClearSelection() { selection = ellipses.end(); }
     HRESULT InsertEllipse(float x, float y);
 
+    MyEllipse PointFarthestFromEdge(MyEllipse a, MyEllipse b, list<shared_ptr<MyEllipse>> p);
+    bool    Contains(list<MyEllipse> points, MyEllipse to_be_found);
+
     BOOL    HitTest(float x, float y);
     void    SetMode(Mode m);
     void    MoveSelection(float x, float y);
@@ -137,6 +148,15 @@ public:
     LRESULT HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam);
 };
 
+MyEllipse PointFarthestFromEdge(MyEllipse a, MyEllipse b, list<shared_ptr<MyEllipse>> p) {
+    return a;
+}
+
+
+bool    Contains(list<MyEllipse> points, MyEllipse to_be_found) {
+    return (std::find(points.begin(), points.end(), to_be_found) != points.end());
+}
+
 HRESULT MainWindow::CreateGraphicsResources()
 {
     HRESULT hr = S_OK;
@@ -156,6 +176,11 @@ HRESULT MainWindow::CreateGraphicsResources()
         {
             const D2D1_COLOR_F color = D2D1::ColorF(1.0f, 1.0f, 0);
             hr = pRenderTarget->CreateSolidColorBrush(color, &pBrush);
+            // Change based on mode selected
+            for (size_t i = 0; i < 10; i++)
+            {
+                InsertEllipse(rand() % 1100 + 100, rand() % 400 + 100);
+            }
         }
     }
     return hr;
@@ -219,32 +244,29 @@ void MainWindow::OnLButtonDown(int pixelX, int pixelY, DWORD flags)
     const float dipX = DPIScale::PixelsToDipsX(pixelX);
     const float dipY = DPIScale::PixelsToDipsY(pixelY);
 
-    if (mode == DrawMode)
+    //if (mode == DrawMode)
+    //{
+    //    POINT pt = { pixelX, pixelY };
+
+    //    if (DragDetect(m_hwnd, pt))
+    //    {
+    //        SetCapture(m_hwnd);
+    //    
+    //        // Start a new ellipse.
+    //        InsertEllipse(dipX, dipY);
+    //    }
+    //}
+    ClearSelection();
+
+    if (HitTest(dipX, dipY))
     {
-        POINT pt = { pixelX, pixelY };
+        SetCapture(m_hwnd);
 
-        if (DragDetect(m_hwnd, pt))
-        {
-            SetCapture(m_hwnd);
-        
-            // Start a new ellipse.
-            InsertEllipse(dipX, dipY);
-        }
-    }
-    else
-    {
-        ClearSelection();
+        ptMouse = Selection()->ellipse.point;
+        ptMouse.x -= dipX;
+        ptMouse.y -= dipY;
 
-        if (HitTest(dipX, dipY))
-        {
-            SetCapture(m_hwnd);
-
-            ptMouse = Selection()->ellipse.point;
-            ptMouse.x -= dipX;
-            ptMouse.y -= dipY;
-
-            SetMode(DragMode);
-        }
+        SetMode(DragMode);
     }
     InvalidateRect(m_hwnd, NULL, FALSE);
 }
@@ -297,15 +319,15 @@ void MainWindow::OnKeyDown(UINT vkey)
     switch (vkey)
     {
     case VK_BACK:
-    case VK_DELETE:
-        if ((mode == SelectMode) && Selection())
+    /*case VK_DELETE:
+        if (Selection())
         {
             ellipses.erase(selection);
             ClearSelection();
             SetMode(SelectMode);
             InvalidateRect(m_hwnd, NULL, FALSE);
         };
-        break;
+        break;*/
 
     case VK_LEFT:
         MoveSelection(-1, 0);
@@ -334,7 +356,7 @@ HRESULT MainWindow::InsertEllipse(float x, float y)
             shared_ptr<MyEllipse>(new MyEllipse()));
 
         Selection()->ellipse.point = ptMouse = D2D1::Point2F(x, y);
-        Selection()->ellipse.radiusX = Selection()->ellipse.radiusY = 2.0f; 
+        Selection()->ellipse.radiusX = Selection()->ellipse.radiusY = 10.0f; 
         Selection()->color = D2D1::ColorF( colors[nextColor] );
 
         nextColor = (nextColor + 1) % ARRAYSIZE(colors);
@@ -362,7 +384,7 @@ BOOL MainWindow::HitTest(float x, float y)
 
 void MainWindow::MoveSelection(float x, float y)
 {
-    if ((mode == SelectMode) && Selection())
+    if (Selection())
     {
         Selection()->ellipse.point.x += x;
         Selection()->ellipse.point.y += y;
@@ -375,10 +397,11 @@ void MainWindow::SetMode(Mode m)
     mode = m;
 
     LPWSTR cursor;
-    switch (mode)
+    cursor = IDC_HAND;
+    /*switch (mode)
     {
     case DrawMode:
-        cursor = IDC_CROSS;
+        cursor = IDC_HAND;
         break;
 
     case SelectMode:
@@ -388,7 +411,7 @@ void MainWindow::SetMode(Mode m)
     case DragMode:
         cursor = IDC_SIZEALL;
         break;
-    }
+    }*/
 
     hCursor = LoadCursor(NULL, cursor);
     SetCursor(hCursor);
@@ -473,7 +496,7 @@ LRESULT MainWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
         return 0;
 
     case WM_COMMAND:
-        switch (LOWORD(wParam))
+        /*switch (LOWORD(wParam))
         {
         case ID_DRAW_MODE:
             SetMode(DrawMode);
@@ -493,7 +516,7 @@ LRESULT MainWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
                 SetMode(DrawMode);
             }
             break;
-        }
+        }*/
         return 0;
     }
     return DefWindowProc(m_hwnd, uMsg, wParam, lParam);
