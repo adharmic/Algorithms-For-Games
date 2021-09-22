@@ -94,7 +94,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="basewin.h" />
-    <ClInclude Include="QuickHull.h" />
     <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
