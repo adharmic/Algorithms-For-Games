@@ -21,13 +21,6 @@ template <class T> void SafeRelease(T **ppT)
     }
 }
 
-template <typename T> list<T> splice(list<T>& v, int start, int end, const list<T>& ar) {
-    list<T> result(begin(v) + start, begin(v) + start + end);
-    v.erase(begin(v) + start, begin(v) + start + end);
-    v.insert(begin(v) + start, begin(ar), end(ar));
-    return result;
-}
-
 class DPIScale
 {
     static float scaleX;
@@ -122,8 +115,8 @@ class MainWindow : public BaseWindow<MainWindow>
     void    ClearSelection() { selection = ellipses.end(); }
     HRESULT InsertEllipse(float x, float y);
 
-    MyEllipse PointFarthestFromEdge(MyEllipse a, MyEllipse b, list<shared_ptr<MyEllipse>> p);
-    bool    Contains(list<MyEllipse> points, MyEllipse to_be_found);
+    MyEllipse PointFarthestFromEdge(MyEllipse a, MyEllipse b, list<shared_ptr<MyEllipse>> p);/*
+    bool    Contains(list<MyEllipse> points, MyEllipse to_be_found);*/
 
     BOOL    HitTest(float x, float y);
     void    SetMode(Mode m);
@@ -147,15 +140,6 @@ public:
     PCWSTR  ClassName() const { return L"Circle Window Class"; }
     LRESULT HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam);
 };
-
-MyEllipse PointFarthestFromEdge(MyEllipse a, MyEllipse b, list<shared_ptr<MyEllipse>> p) {
-    return a;
-}
-
-
-bool    Contains(list<MyEllipse> points, MyEllipse to_be_found) {
-    return (std::find(points.begin(), points.end(), to_be_found) != points.end());
-}
 
 HRESULT MainWindow::CreateGraphicsResources()
 {
@@ -328,6 +312,7 @@ void MainWindow::OnKeyDown(UINT vkey)
             InvalidateRect(m_hwnd, NULL, FALSE);
         };
         break;*/
+        break;
 
     case VK_LEFT:
         MoveSelection(-1, 0);
@@ -367,6 +352,16 @@ HRESULT MainWindow::InsertEllipse(float x, float y)
     }
     return S_OK;
 }
+
+MyEllipse MainWindow::PointFarthestFromEdge(MyEllipse a, MyEllipse b, list<shared_ptr<MyEllipse>> p)
+{
+    return a;
+}
+
+//bool MainWindow::Contains(list<MyEllipse> points, MyEllipse to_be_found)
+//{
+//    return (std::find(points.begin(), points.end(), to_be_found) != points.end());
+//}
 
 
 BOOL MainWindow::HitTest(float x, float y)
@@ -517,6 +512,7 @@ LRESULT MainWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
             }
             break;
         }*/
+        break;
         return 0;
     }
     return DefWindowProc(m_hwnd, uMsg, wParam, lParam);
