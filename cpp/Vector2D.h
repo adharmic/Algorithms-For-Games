@@ -5,7 +5,8 @@
 #include <math.h>
 
 
-//VECTOR MATH LIBRARY FROM ALLEGRO PORTED FOR C++ PURPOSES BY DANIEL SOLTYKA
+// VECTOR MATH LIBRARY FROM ALLEGRO PORTED FOR C++ PURPOSES BY DANIEL SOLTYKA
+// http://www.danielsoltyka.com/programming/2010/05/30/c-vector2d-rectangle-classes/
 
 class Vector2D
 {

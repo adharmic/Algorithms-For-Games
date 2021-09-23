@@ -1,1 +1,2 @@
 C:\Users\Adithya\Documents\GitHub\Algorithms-For-Games\cpp\Debug\SimpleDrawing.exe
+C:\Users\adith\Documents\GitHub\Algorithms-For-Games\cpp\Debug\SimpleDrawing.exe

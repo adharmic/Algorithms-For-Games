@@ -11,6 +11,7 @@ using namespace std;
 
 #include "basewin.h"
 #include "resource.h"
+#include "QuickHull.cpp"
 
 template <class T> void SafeRelease(T **ppT)
 {
@@ -183,6 +184,8 @@ void MainWindow::OnPaint()
     {
         PAINTSTRUCT ps;
         BeginPaint(m_hwnd, &ps);
+
+        list<D2D1_ELLIPSE> *hullpoints = new list<D2D1_ELLIPSE>;
      
         pRenderTarget->BeginDraw();
 
@@ -190,8 +193,28 @@ void MainWindow::OnPaint()
 
         for (auto i = ellipses.begin(); i != ellipses.end(); ++i)
         {
+            (*hullpoints).push_back((*i)->ellipse);
             (*i)->Draw(pRenderTarget, pBrush);
         }
+
+        QuickHull *qhull = new QuickHull(*hullpoints);
+
+        list<D2D1_ELLIPSE> quick_hull_points = (qhull)->GetConvexHull();
+
+        for (size_t i = 0; i < quick_hull_points.size() - 1; i++) {
+            auto hull_a = std::next(quick_hull_points.begin(), i);
+            auto hull_b = std::next(quick_hull_points.begin(), i+1);
+            D2D1_POINT_2F point_a = D2D1::Point2F((*hull_a).point.x, (*hull_a).point.y);
+            D2D1_POINT_2F point_b = D2D1::Point2F((*hull_b).point.x, (*hull_b).point.y);
+            pRenderTarget->DrawLine(point_a, point_b, pBrush);
+
+        }
+
+        auto hull_a = std::next(quick_hull_points.begin(), quick_hull_points.size() - 1);
+        auto hull_b = std::next(quick_hull_points.begin(), 0);
+        D2D1_POINT_2F point_a = D2D1::Point2F((*hull_a).point.x, (*hull_a).point.y);
+        D2D1_POINT_2F point_b = D2D1::Point2F((*hull_b).point.x, (*hull_b).point.y);
+        pRenderTarget->DrawLine(point_a, point_b, pBrush);
 
         if (Selection())
         {
