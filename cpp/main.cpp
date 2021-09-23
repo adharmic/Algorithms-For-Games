@@ -10,6 +10,7 @@ using namespace std;
 #pragma comment(lib, "d2d1")
 
 #include "basewin.h"
+#include "buttonwin.h"
 #include "resource.h"
 #include "QuickHull.cpp"
 
@@ -79,10 +80,121 @@ struct MyEllipse
 D2D1::ColorF::Enum colors[] = { D2D1::ColorF::Yellow, D2D1::ColorF::Salmon, D2D1::ColorF::LimeGreen };
 
 
+//Button window
+class ButtonsWindow : public ButtonWindow<ButtonsWindow>
+{
+    enum Mode
+    {
+        SelectMode
+    };
+
+    HCURSOR                 hCursor;
+
+    ID2D1Factory            *pFactory;
+    ID2D1HwndRenderTarget   *pRenderTarget;
+    ID2D1SolidColorBrush    *pBrush;
+    D2D1_POINT_2F           ptMouse;
+
+    Mode                    mode;
+    size_t                  nextColor;
+
+
+    /*MyEllipse PointFarthestFromEdge(MyEllipse a, MyEllipse b, list<shared_ptr<MyEllipse>> p);
+    bool    Contains(list<MyEllipse> points, MyEllipse to_be_found);*/
+
+    void    SetMode(Mode m);
+    HRESULT CreateGraphicsResources();
+    void    DiscardGraphicsResources();
+    void    Resize();
+    void    OnLButtonDown(int pixelX, int pixelY, DWORD flags);
+    void    OnLButtonUp();
+
+public:
+
+    ButtonsWindow() : pFactory(NULL), pRenderTarget(NULL), pBrush(NULL),
+        ptMouse(D2D1::Point2F()), nextColor(0)
+        //, selection(ellipses.end())
+    {
+    }
+
+    PCWSTR  ClassName() const { return L"Button Window Class"; }
+    LRESULT HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam);
+};
+
+HRESULT ButtonsWindow::CreateGraphicsResources()
+{
+    HRESULT hr = S_OK;
+    if (pRenderTarget == NULL)
+    {
+        RECT rc;
+        GetClientRect(m_hwnd, &rc);
+
+        D2D1_SIZE_U size = D2D1::SizeU(rc.right, rc.bottom);
+
+        hr = pFactory->CreateHwndRenderTarget(
+            D2D1::RenderTargetProperties(),
+            D2D1::HwndRenderTargetProperties(m_hwnd, size),
+            &pRenderTarget);
+
+        if (SUCCEEDED(hr))
+        {
+            const D2D1_COLOR_F color = D2D1::ColorF(1.0f, 0.6f, 0);
+            hr = pRenderTarget->CreateSolidColorBrush(color, &pBrush);
+            
+
+        }
+    }
+    return hr;
+}
+
+void ButtonsWindow::DiscardGraphicsResources()
+{
+    SafeRelease(&pRenderTarget);
+    SafeRelease(&pBrush);
+}
+
+
+void ButtonsWindow::SetMode(Mode m)
+{
+    mode = m;
+
+    LPWSTR cursor;
+    cursor = IDC_HAND;
+
+    hCursor = LoadCursor(NULL, cursor);
+    SetCursor(hCursor);
+}
+
+void ButtonsWindow::Resize()
+{
+    if (pRenderTarget != NULL)
+    {
+        RECT rc;
+        GetClientRect(m_hwnd, &rc);
+
+        D2D1_SIZE_U size = D2D1::SizeU(rc.right, rc.bottom);
+
+        pRenderTarget->Resize(size);
+
+        InvalidateRect(m_hwnd, NULL, FALSE);
+    }
+}
+
+void ButtonsWindow::OnLButtonDown(int pixelX, int pixelY, DWORD flags)
+{
+}
+
+void ButtonsWindow::OnLButtonUp()
+{
+}
+
+
+
 class MainWindow : public BaseWindow<MainWindow>
 {
     enum Mode
     {
+        //Change to only one mode?
         DrawMode,
         SelectMode,
         DragMode
@@ -166,6 +278,7 @@ HRESULT MainWindow::CreateGraphicsResources()
             {
                 InsertEllipse(rand() % 1100 + 100, rand() % 400 + 100);
             }
+            
         }
     }
     return hr;
@@ -441,6 +554,16 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 
     ShowWindow(win.Window(), nCmdShow);
 
+    // Creating buttons
+    ButtonsWindow button1;
+
+    if (!button1.Create(L"Button 1", WS_CHILDWINDOW, win.Window()))
+    {
+        return 0;
+    }
+
+    ShowWindow(button1.Window(), nCmdShow);
+
     MSG msg;
     while (GetMessage(&msg, NULL, 0, 0))
     {
@@ -504,6 +627,86 @@ LRESULT MainWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
     case WM_KEYDOWN:
         OnKeyDown((UINT)wParam);
         return 0;
+
+    case WM_COMMAND:
+        /*switch (LOWORD(wParam))
+        {
+        case ID_DRAW_MODE:
+            SetMode(DrawMode);
+            break;
+
+        case ID_SELECT_MODE:
+            SetMode(SelectMode);
+            break;
+
+        case ID_TOGGLE_MODE:
+            if (mode == DrawMode)
+            {
+                SetMode(SelectMode);
+            }
+            else
+            {
+                SetMode(DrawMode);
+            }
+            break;
+        }*/
+        break;
+        return 0;
+    }
+    return DefWindowProc(m_hwnd, uMsg, wParam, lParam);
+}
+
+LRESULT ButtonsWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+    switch (uMsg)
+    {
+    case WM_CREATE:
+        if (FAILED(D2D1CreateFactory(
+            D2D1_FACTORY_TYPE_SINGLE_THREADED, &pFactory)))
+        {
+            return -1;  // Fail CreateWindowEx.
+        }
+        DPIScale::Initialize(pFactory);
+        SetMode(SelectMode);
+        return 0;
+
+    case WM_DESTROY:
+        DiscardGraphicsResources();
+        SafeRelease(&pFactory);
+        PostQuitMessage(0);
+        return 0;
+
+    /*case WM_PAINT:
+        OnPaint();
+        return 0;*/
+
+    case WM_SIZE:
+        Resize();
+        return 0;
+
+    case WM_LBUTTONDOWN:
+        OnLButtonDown(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), (DWORD)wParam);
+        return 0;
+
+    case WM_LBUTTONUP:
+        OnLButtonUp();
+        return 0;
+
+    /*case WM_MOUSEMOVE:
+        OnMouseMove(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), (DWORD)wParam);
+        return 0;*/
+
+    /*case WM_SETCURSOR:
+        if (LOWORD(lParam) == HTCLIENT)
+        {
+            SetCursor(hCursor);
+            return TRUE;
+        }
+        break;*/
+
+    /*case WM_KEYDOWN:
+        OnKeyDown((UINT)wParam);
+        return 0;*/
 
     case WM_COMMAND:
         /*switch (LOWORD(wParam))

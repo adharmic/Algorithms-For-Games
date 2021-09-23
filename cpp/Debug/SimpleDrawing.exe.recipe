@@ -2,7 +2,11 @@
 <Project>
   <ProjectOutputs>
     <ProjectOutput>
+<<<<<<< Updated upstream
       <FullPath>C:\Users\adith\Documents\GitHub\Algorithms-For-Games\cpp\Debug\SimpleDrawing.exe</FullPath>
+=======
+      <FullPath>C:\Users\Guille Hernandez\Documents\GitHub\Algorithms-For-Games\cpp\Debug\SimpleDrawing.exe</FullPath>
+>>>>>>> Stashed changes
     </ProjectOutput>
   </ProjectOutputs>
   <ContentFiles />
