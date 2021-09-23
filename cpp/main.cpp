@@ -557,7 +557,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
     // Creating buttons
     ButtonsWindow button1;
 
-    if (!button1.Create(L"Button 1", WS_CHILDWINDOW, win.Window()))
+    if (!button1.Create(L"Button 1", WS_OVERLAPPEDWINDOW, win.Window()))
     {
         return 0;
     }

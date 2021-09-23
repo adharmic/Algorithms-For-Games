@@ -54,8 +54,8 @@ public:
         RegisterClass(&wc);
 
         m_hwnd = CreateWindowEx(
-            dwExStyle, ClassName(), lpWindowName, dwStyle, 10, 10,
-            1000, 1000, hWndParent, hMenu, GetModuleHandle(NULL), this
+            dwExStyle, ClassName(), lpWindowName, dwStyle, x, y,
+            nWidth, nHeight, hWndParent, hMenu, GetModuleHandle(NULL), this
         );
 
         return (m_hwnd ? TRUE : FALSE);
