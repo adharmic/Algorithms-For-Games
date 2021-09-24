@@ -201,6 +201,8 @@ void MainWindow::OnPaint()
 
         list<D2D1_ELLIPSE> quick_hull_points = (qhull)->GetConvexHull();
 
+        printf("%d\n", quick_hull_points.size());
+
         for (size_t i = 0; i < quick_hull_points.size() - 1; i++) {
             auto hull_a = std::next(quick_hull_points.begin(), i);
             auto hull_b = std::next(quick_hull_points.begin(), i+1);

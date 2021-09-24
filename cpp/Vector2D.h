@@ -3,6 +3,7 @@
 #pragma once
 
 #include <math.h>
+#include <d2d1.h>
 
 
 // VECTOR MATH LIBRARY FROM ALLEGRO PORTED FOR C++ PURPOSES BY DANIEL SOLTYKA
@@ -17,9 +18,11 @@ public:
 
     void Rotate(const float angle);
     float Magnitude() const;
-    float Normalize();
+    void Normalize();
     float DotProduct(const Vector2D& v2) const;
     float CrossProduct(const Vector2D& v2) const;
+
+    //Vector2D Normalize();
 
     static Vector2D Zero();
     static float Distance(const Vector2D& v1, const Vector2D& v2);

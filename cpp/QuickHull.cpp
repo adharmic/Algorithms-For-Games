@@ -36,9 +36,12 @@ public:
 		for (size_t i = 0; i < p.size(); i++) {
 			auto point = std::next(p.begin(), i);
 			D2D1_ELLIPSE curr_point = *point;
-			Vector2D *curr = new Vector2D(curr_point.point.x - a.point.x, curr_point.point.y - a.point.y);
-			float d = (*curr).DotProduct(*eperp);
-			float r = (*curr).DotProduct(*e);
+			Vector2D *curr = new Vector2D(curr_point.point.x - a.point.x, (curr_point.point.y - a.point.y)*-1);
+			(*curr).Normalize();
+			(*e).Normalize();
+			(*eperp).Normalize();
+			float d = (*curr).DotProduct((*eperp));
+			float r = (*curr).DotProduct((*e));
 			if (d > max_val || (d == max_val && r > right_most_val)) {
 				best_index = i;
 				max_val = d;
@@ -103,10 +106,12 @@ public:
 		extreme_points.push_back(bottom_most_point);
 		extreme_points.push_back(left_most_point);
 
-		for (size_t i = 1; i < hull.size() + 1; i++) {
+		list<D2D1_ELLIPSE>::iterator itr = hull.begin();
+
+		/*for (size_t i = 1; i < hull.size() + 1; i++) {
 			auto hull_a = std::next(hull.begin(), 0);
 			auto hull_b = std::next(hull.begin(), 0);
-			auto placement = std::next(hull.begin(), i);
+			auto placement = std::next(hull.begin(), i+1);
 			if (i != hull.size()) {
 				hull_a = std::next(hull.begin(), i - 1);
 				hull_b = std::next(hull.begin(), i);
@@ -116,7 +121,7 @@ public:
 				hull_b = std::next(hull.begin(), 0);
 			}
 			D2D1_ELLIPSE farthest_pt = PointFarthestFromEdge(*hull_a, *hull_b, original_list);
-			if (!Contains(hull, farthest_pt)) {
+			if ((farthest_pt.point.x != -1 && farthest_pt.point.y != -1 ) && !Contains(hull, farthest_pt)) {
 				hull.insert(placement, farthest_pt);
 				if (i < 1) {
 					i = i - 2;
@@ -125,7 +130,7 @@ public:
 					i--;
 				}
 			}
-		}
+		}*/
 		return hull;
 
 

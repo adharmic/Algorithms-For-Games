@@ -28,21 +28,38 @@ float Vector2D::Magnitude() const
     return sqrtf(x * x + y * y);
 }
 
+void Vector2D::Normalize() {
+    float theta = atan(y / x);
+    float new_y = sin(theta);
+    float new_x = cos(theta);
+    if (x > 0) {
+        x = new_x;
+        y = new_y;
+    }
+    else if (x < 0) {
+        x *= -1;
+        y *= -1;
+    }
+    else {
+        x = 0;
+    }
+}
+
 //-----------------------------------------------------------------------------
 // Purpose: Convert vector to a unit vector and return previous magnitude
 //-----------------------------------------------------------------------------
-float Vector2D::Normalize()
-{
-    float mag = Magnitude();
-
-    if (mag != 0.0)
-    {
-        x /= mag;
-        y /= mag;
-    }
-
-    return mag;
-}
+//float Vector2D::Normalize()
+//{
+//    float mag = Magnitude();
+//
+//    if (mag != 0.0)
+//    {
+//        x /= mag;
+//        y /= mag;
+//    }
+//
+//    return mag;
+//}
 
 //-----------------------------------------------------------------------------
 // Purpose: Dot Product
