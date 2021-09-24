@@ -36,12 +36,12 @@ public:
     BOOL Create(
         PCWSTR lpWindowName,
         DWORD dwStyle,
-        HWND hWndParent = 0,
+        HWND hWndParent,
         DWORD dwExStyle = 0,
-        int x = CW_USEDEFAULT,
-        int y = CW_USEDEFAULT,
-        int nWidth = CW_USEDEFAULT,
-        int nHeight = CW_USEDEFAULT,
+        int x = 100,
+        int y = 100,
+        int nWidth = 100,
+        int nHeight = 100,
         HMENU hMenu = 0
     )
     {

@@ -105,7 +105,7 @@ class ButtonsWindow : public ButtonWindow<ButtonsWindow>
     void    SetMode(Mode m);
     HRESULT CreateGraphicsResources();
     void    DiscardGraphicsResources();
-    void    Resize();
+    void    OnPaint();
     void    OnLButtonDown(int pixelX, int pixelY, DWORD flags);
     void    OnLButtonUp();
 
@@ -138,7 +138,7 @@ HRESULT ButtonsWindow::CreateGraphicsResources()
 
         if (SUCCEEDED(hr))
         {
-            const D2D1_COLOR_F color = D2D1::ColorF(1.0f, 0.6f, 0);
+            const D2D1_COLOR_F color = D2D1::ColorF(0, 0, 0);
             hr = pRenderTarget->CreateSolidColorBrush(color, &pBrush);
             
 
@@ -165,27 +165,44 @@ void ButtonsWindow::SetMode(Mode m)
     SetCursor(hCursor);
 }
 
-void ButtonsWindow::Resize()
-{
-    if (pRenderTarget != NULL)
-    {
-        RECT rc;
-        GetClientRect(m_hwnd, &rc);
-
-        D2D1_SIZE_U size = D2D1::SizeU(rc.right, rc.bottom);
-
-        pRenderTarget->Resize(size);
-
-        InvalidateRect(m_hwnd, NULL, FALSE);
-    }
-}
-
 void ButtonsWindow::OnLButtonDown(int pixelX, int pixelY, DWORD flags)
 {
 }
 
 void ButtonsWindow::OnLButtonUp()
 {
+}
+
+void ButtonsWindow::OnPaint()
+{
+    HRESULT hr = CreateGraphicsResources();
+    if (SUCCEEDED(hr))
+    {
+        PAINTSTRUCT ps;
+        BeginPaint(m_hwnd, &ps);
+
+        pRenderTarget->BeginDraw();
+
+        pRenderTarget->Clear(D2D1::ColorF(D2D1::ColorF::Yellow));
+
+        /*for (auto i = ellipses.begin(); i != ellipses.end(); ++i)
+        {
+            (*i)->Draw(pRenderTarget, pBrush);
+        }
+
+        if (Selection())
+        {
+            pBrush->SetColor(D2D1::ColorF(D2D1::ColorF::Red));
+            pRenderTarget->DrawEllipse(Selection()->ellipse, pBrush, 2.0f);
+        }*/
+
+        hr = pRenderTarget->EndDraw();
+        if (FAILED(hr) || hr == D2DERR_RECREATE_TARGET)
+        {
+            DiscardGraphicsResources();
+        }
+        EndPaint(m_hwnd, &ps);
+    }
 }
 
 
@@ -557,12 +574,15 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
     // Creating buttons
     ButtonsWindow button1;
 
-    if (!button1.Create(L"Button 1", WS_OVERLAPPEDWINDOW, win.Window()))
+    if (!button1.Create(L"Button 1", WS_VISIBLE | WS_CHILD, win.Window()))
     {
         return 0;
     }
 
-    ShowWindow(button1.Window(), nCmdShow);
+    ShowWindow(button1.Window(), nCmdShow); 
+    //ShowWindow(win.Window(), nCmdShow);
+
+    
 
     MSG msg;
     while (GetMessage(&msg, NULL, 0, 0))
@@ -676,13 +696,13 @@ LRESULT ButtonsWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
         PostQuitMessage(0);
         return 0;
 
-    /*case WM_PAINT:
+    case WM_PAINT:
         OnPaint();
-        return 0;*/
-
-    case WM_SIZE:
-        Resize();
         return 0;
+
+    /*case WM_SIZE:
+        Resize();
+        return 0;*/
 
     case WM_LBUTTONDOWN:
         OnLButtonDown(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), (DWORD)wParam);
