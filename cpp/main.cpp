@@ -10,7 +10,6 @@ using namespace std;
 #pragma comment(lib, "d2d1")
 
 #include "basewin.h"
-#include "buttonwin.h"
 #include "resource.h"
 #include "QuickHull.cpp"
 
@@ -80,8 +79,114 @@ struct MyEllipse
 D2D1::ColorF::Enum colors[] = { D2D1::ColorF::Yellow, D2D1::ColorF::Salmon, D2D1::ColorF::LimeGreen };
 
 
+//Base window
+class MainWindow : public BaseWindow<MainWindow>
+{
+    enum Mode
+    {
+    };
+
+    HCURSOR                 hCursor;
+
+    ID2D1Factory            *pFactory;
+    ID2D1HwndRenderTarget   *pRenderTarget;
+    ID2D1SolidColorBrush    *pBrush;
+    D2D1_POINT_2F           ptMouse;
+
+    Mode                    mode;
+    size_t                  nextColor;
+
+
+    /*MyEllipse PointFarthestFromEdge(MyEllipse a, MyEllipse b, list<shared_ptr<MyEllipse>> p);
+    bool    Contains(list<MyEllipse> points, MyEllipse to_be_found);*/
+
+    //void    SetMode(Mode m);
+    HRESULT CreateGraphicsResources();
+    void    DiscardGraphicsResources();
+    void    OnPaint();
+    //void    OnLButtonDown(int pixelX, int pixelY, DWORD flags);
+    //void    OnLButtonUp();
+
+public:
+
+    MainWindow() : pFactory(NULL), pRenderTarget(NULL), pBrush(NULL),
+        ptMouse(D2D1::Point2F()), nextColor(0)
+        //, selection(ellipses.end())
+    {
+    }
+
+    PCWSTR  ClassName() const { return L"Button Window Class"; }
+    LRESULT HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam);
+};
+
+HRESULT MainWindow::CreateGraphicsResources()
+{
+    HRESULT hr = S_OK;
+    if (pRenderTarget == NULL)
+    {
+        RECT rc;
+        GetClientRect(m_hwnd, &rc);
+
+        D2D1_SIZE_U size = D2D1::SizeU(rc.right, rc.bottom);
+
+        hr = pFactory->CreateHwndRenderTarget(
+            D2D1::RenderTargetProperties(),
+            D2D1::HwndRenderTargetProperties(m_hwnd, size),
+            &pRenderTarget);
+
+        if (SUCCEEDED(hr))
+        {
+            const D2D1_COLOR_F color = D2D1::ColorF(0, 0, 0);
+            hr = pRenderTarget->CreateSolidColorBrush(color, &pBrush);
+
+
+        }
+    }
+    return hr;
+}
+
+void MainWindow::DiscardGraphicsResources()
+{
+    SafeRelease(&pRenderTarget);
+    SafeRelease(&pBrush);
+}
+
+void MainWindow::OnPaint()
+{
+    HRESULT hr = CreateGraphicsResources();
+    if (SUCCEEDED(hr))
+    {
+        PAINTSTRUCT ps;
+        BeginPaint(m_hwnd, &ps);
+
+        pRenderTarget->BeginDraw();
+
+        pRenderTarget->Clear(D2D1::ColorF(D2D1::ColorF::SkyBlue));
+
+        /*for (auto i = ellipses.begin(); i != ellipses.end(); ++i)
+        {
+            (*i)->Draw(pRenderTarget, pBrush);
+        }
+
+        if (Selection())
+        {
+            pBrush->SetColor(D2D1::ColorF(D2D1::ColorF::Red));
+            pRenderTarget->DrawEllipse(Selection()->ellipse, pBrush, 2.0f);
+        }*/
+
+        hr = pRenderTarget->EndDraw();
+        if (FAILED(hr) || hr == D2DERR_RECREATE_TARGET)
+        {
+            DiscardGraphicsResources();
+        }
+        EndPaint(m_hwnd, &ps);
+    }
+}
+
+
+
 //Button window
-class ButtonsWindow : public ButtonWindow<ButtonsWindow>
+class ButtonsWindow : public BaseWindow<ButtonsWindow>
 {
     enum Mode
     {
@@ -153,7 +258,6 @@ void ButtonsWindow::DiscardGraphicsResources()
     SafeRelease(&pBrush);
 }
 
-
 void ButtonsWindow::SetMode(Mode m)
 {
     mode = m;
@@ -206,8 +310,9 @@ void ButtonsWindow::OnPaint()
 }
 
 
+//Algorithm window
 
-class MainWindow : public BaseWindow<MainWindow>
+class AlgorithmWindow : public BaseWindow<AlgorithmWindow>
 {
     enum Mode
     {
@@ -262,7 +367,7 @@ class MainWindow : public BaseWindow<MainWindow>
 
 public:
 
-    MainWindow() : pFactory(NULL), pRenderTarget(NULL), pBrush(NULL), 
+    AlgorithmWindow() : pFactory(NULL), pRenderTarget(NULL), pBrush(NULL),
         ptMouse(D2D1::Point2F()), nextColor(0), selection(ellipses.end())
     {
     }
@@ -271,7 +376,7 @@ public:
     LRESULT HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam);
 };
 
-HRESULT MainWindow::CreateGraphicsResources()
+HRESULT AlgorithmWindow::CreateGraphicsResources()
 {
     HRESULT hr = S_OK;
     if (pRenderTarget == NULL)
@@ -293,7 +398,7 @@ HRESULT MainWindow::CreateGraphicsResources()
             // Change based on mode selected
             for (size_t i = 0; i < 10; i++)
             {
-                InsertEllipse(rand() % 1100 + 100, rand() % 400 + 100);
+                InsertEllipse(rand() % 780 + 10, rand() % 260 + 10);
             }
             
         }
@@ -301,13 +406,13 @@ HRESULT MainWindow::CreateGraphicsResources()
     return hr;
 }
 
-void MainWindow::DiscardGraphicsResources()
+void AlgorithmWindow::DiscardGraphicsResources()
 {
     SafeRelease(&pRenderTarget);
     SafeRelease(&pBrush);
 }
 
-void MainWindow::OnPaint()
+void AlgorithmWindow::OnPaint()
 {
     HRESULT hr = CreateGraphicsResources();
     if (SUCCEEDED(hr))
@@ -319,7 +424,7 @@ void MainWindow::OnPaint()
      
         pRenderTarget->BeginDraw();
 
-        pRenderTarget->Clear( D2D1::ColorF(D2D1::ColorF::SkyBlue) );
+        pRenderTarget->Clear( D2D1::ColorF(D2D1::ColorF::White) );
 
         for (auto i = ellipses.begin(); i != ellipses.end(); ++i)
         {
@@ -361,7 +466,7 @@ void MainWindow::OnPaint()
     }
 }
 
-void MainWindow::Resize()
+void AlgorithmWindow::Resize()
 {
     if (pRenderTarget != NULL)
     {
@@ -376,7 +481,7 @@ void MainWindow::Resize()
     }
 }
 
-void MainWindow::OnLButtonDown(int pixelX, int pixelY, DWORD flags)
+void AlgorithmWindow::OnLButtonDown(int pixelX, int pixelY, DWORD flags)
 {
     const float dipX = DPIScale::PixelsToDipsX(pixelX);
     const float dipY = DPIScale::PixelsToDipsY(pixelY);
@@ -408,7 +513,7 @@ void MainWindow::OnLButtonDown(int pixelX, int pixelY, DWORD flags)
     InvalidateRect(m_hwnd, NULL, FALSE);
 }
 
-void MainWindow::OnLButtonUp()
+void AlgorithmWindow::OnLButtonUp()
 {
     if ((mode == DrawMode) && Selection())
     {
@@ -422,8 +527,7 @@ void MainWindow::OnLButtonUp()
     ReleaseCapture(); 
 }
 
-
-void MainWindow::OnMouseMove(int pixelX, int pixelY, DWORD flags)
+void AlgorithmWindow::OnMouseMove(int pixelX, int pixelY, DWORD flags)
 {
     const float dipX = DPIScale::PixelsToDipsX(pixelX);
     const float dipY = DPIScale::PixelsToDipsY(pixelY);
@@ -450,8 +554,7 @@ void MainWindow::OnMouseMove(int pixelX, int pixelY, DWORD flags)
     }
 }
 
-
-void MainWindow::OnKeyDown(UINT vkey)
+void AlgorithmWindow::OnKeyDown(UINT vkey)
 {
     switch (vkey)
     {
@@ -485,7 +588,7 @@ void MainWindow::OnKeyDown(UINT vkey)
     }
 }
 
-HRESULT MainWindow::InsertEllipse(float x, float y)
+HRESULT AlgorithmWindow::InsertEllipse(float x, float y)
 {
     try
     {
@@ -506,10 +609,7 @@ HRESULT MainWindow::InsertEllipse(float x, float y)
     return S_OK;
 }
 
-
-
-
-BOOL MainWindow::HitTest(float x, float y)
+BOOL AlgorithmWindow::HitTest(float x, float y)
 {
     for (auto i = ellipses.rbegin(); i != ellipses.rend(); ++i)
     {
@@ -522,7 +622,7 @@ BOOL MainWindow::HitTest(float x, float y)
     return FALSE;
 }
 
-void MainWindow::MoveSelection(float x, float y)
+void AlgorithmWindow::MoveSelection(float x, float y)
 {
     if (Selection())
     {
@@ -532,7 +632,7 @@ void MainWindow::MoveSelection(float x, float y)
     }
 }
 
-void MainWindow::SetMode(Mode m)
+void AlgorithmWindow::SetMode(Mode m)
 {
     mode = m;
 
@@ -558,6 +658,9 @@ void MainWindow::SetMode(Mode m)
 }
 
 
+
+//MAIN PROGRAM
+
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 {
     MainWindow win;
@@ -572,15 +675,68 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
     ShowWindow(win.Window(), nCmdShow);
 
     // Creating buttons
+    // But1
     ButtonsWindow button1;
 
-    if (!button1.Create(L"Button 1", WS_VISIBLE | WS_CHILD, win.Window()))
+    if (!button1.Create(L"Button 1", WS_TABSTOP | WS_VISIBLE | WS_CHILD ,
+        10, 10, 100, 50, win.Window()))
     {
         return 0;
     }
 
-    ShowWindow(button1.Window(), nCmdShow); 
-    //ShowWindow(win.Window(), nCmdShow);
+    ShowWindow(button1.Window(), nCmdShow);
+    // But2
+    ButtonsWindow button2;
+
+    if (!button2.Create(L"Button 2", WS_TABSTOP | WS_VISIBLE | WS_CHILD,
+        10, 70, 100, 50, win.Window()))
+    {
+        return 0;
+    }
+
+    ShowWindow(button2.Window(), nCmdShow);
+    // But3
+    ButtonsWindow button3;
+
+    if (!button3.Create(L"Button 3", WS_TABSTOP | WS_VISIBLE | WS_CHILD,
+        10, 130, 100, 50, win.Window()))
+    {
+        return 0;
+    }
+
+    ShowWindow(button3.Window(), nCmdShow);
+    // But4
+    ButtonsWindow button4;
+
+    if (!button4.Create(L"Button 4", WS_TABSTOP | WS_VISIBLE | WS_CHILD,
+        10, 190, 100, 50, win.Window()))
+    {
+        return 0;
+    }
+
+    ShowWindow(button4.Window(), nCmdShow);
+    // But5
+    ButtonsWindow button5;
+
+    if (!button5.Create(L"Button 5", WS_TABSTOP | WS_VISIBLE | WS_CHILD,
+        10, 250, 100, 50, win.Window()))
+    {
+        return 0;
+    }
+
+    ShowWindow(button5.Window(), nCmdShow);
+
+    // Algorithm Window
+    AlgorithmWindow algwin;
+
+    if (!algwin.Create(L"Algorithms", WS_TABSTOP | WS_VISIBLE | WS_CHILD,
+        120, 10, 800, 290, win.Window()))
+    {
+        return 0;
+    }
+
+    ShowWindow(algwin.Window(), nCmdShow);
+
 
     
 
@@ -596,7 +752,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
     return 0;
 }
 
-LRESULT MainWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
+LRESULT AlgorithmWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
     switch (uMsg)
     {
@@ -711,6 +867,86 @@ LRESULT ButtonsWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
     case WM_LBUTTONUP:
         OnLButtonUp();
         return 0;
+
+    /*case WM_MOUSEMOVE:
+        OnMouseMove(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), (DWORD)wParam);
+        return 0;*/
+
+    /*case WM_SETCURSOR:
+        if (LOWORD(lParam) == HTCLIENT)
+        {
+            SetCursor(hCursor);
+            return TRUE;
+        }
+        break;*/
+
+    /*case WM_KEYDOWN:
+        OnKeyDown((UINT)wParam);
+        return 0;*/
+
+    case WM_COMMAND:
+        /*switch (LOWORD(wParam))
+        {
+        case ID_DRAW_MODE:
+            SetMode(DrawMode);
+            break;
+
+        case ID_SELECT_MODE:
+            SetMode(SelectMode);
+            break;
+
+        case ID_TOGGLE_MODE:
+            if (mode == DrawMode)
+            {
+                SetMode(SelectMode);
+            }
+            else
+            {
+                SetMode(DrawMode);
+            }
+            break;
+        }*/
+        break;
+        return 0;
+    }
+    return DefWindowProc(m_hwnd, uMsg, wParam, lParam);
+}
+
+LRESULT MainWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+    switch (uMsg)
+    {
+    case WM_CREATE:
+        if (FAILED(D2D1CreateFactory(
+            D2D1_FACTORY_TYPE_SINGLE_THREADED, &pFactory)))
+        {
+            return -1;  // Fail CreateWindowEx.
+        }
+        DPIScale::Initialize(pFactory);
+        //SetMode(SelectMode);
+        return 0;
+
+    case WM_DESTROY:
+        DiscardGraphicsResources();
+        SafeRelease(&pFactory);
+        PostQuitMessage(0);
+        return 0;
+
+    case WM_PAINT:
+        OnPaint();
+        return 0;
+
+    /*case WM_SIZE:
+        Resize();
+        return 0;*/
+
+    /*case WM_LBUTTONDOWN:
+        OnLButtonDown(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), (DWORD)wParam);
+        return 0;
+
+    case WM_LBUTTONUP:
+        OnLButtonUp();
+        return 0;*/
 
     /*case WM_MOUSEMOVE:
         OnMouseMove(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), (DWORD)wParam);
