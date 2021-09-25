@@ -78,6 +78,71 @@ struct MyEllipse
 
 D2D1::ColorF::Enum colors[] = { D2D1::ColorF::Yellow, D2D1::ColorF::Salmon, D2D1::ColorF::LimeGreen };
 
+//POP-UP window for testing
+class PopWindow : public BaseWindow<PopWindow>
+{
+    enum Mode
+    {
+    };
+
+    HCURSOR                 hCursor;
+
+    ID2D1Factory* pFactory;
+    ID2D1HwndRenderTarget* pRenderTarget;
+    ID2D1SolidColorBrush* pBrush;
+    D2D1_POINT_2F           ptMouse;
+
+    Mode                    mode;
+    size_t                  nextColor;
+
+
+
+    HRESULT CreateGraphicsResources();
+    void    DiscardGraphicsResources();
+
+public:
+
+    PopWindow() : pFactory(NULL), pRenderTarget(NULL), pBrush(NULL),
+        ptMouse(D2D1::Point2F()), nextColor(0)
+        //, selection(ellipses.end())
+    {
+    }
+
+    PCWSTR  ClassName() const { return L"Button Window Class"; }
+    LRESULT HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam);
+};
+
+HRESULT PopWindow::CreateGraphicsResources()
+{
+    HRESULT hr = S_OK;
+    if (pRenderTarget == NULL)
+    {
+        RECT rc;
+        GetClientRect(m_hwnd, &rc);
+
+        D2D1_SIZE_U size = D2D1::SizeU(rc.right, rc.bottom);
+
+        hr = pFactory->CreateHwndRenderTarget(
+            D2D1::RenderTargetProperties(),
+            D2D1::HwndRenderTargetProperties(m_hwnd, size),
+            &pRenderTarget);
+
+        if (SUCCEEDED(hr))
+        {
+            const D2D1_COLOR_F color = D2D1::ColorF(0, 0, 0);
+            hr = pRenderTarget->CreateSolidColorBrush(color, &pBrush);
+
+
+        }
+    }
+    return hr;
+}
+
+void PopWindow::DiscardGraphicsResources()
+{
+    SafeRelease(&pRenderTarget);
+    SafeRelease(&pBrush);
+}
 
 //Base window
 class MainWindow : public BaseWindow<MainWindow>
@@ -104,6 +169,7 @@ class MainWindow : public BaseWindow<MainWindow>
     HRESULT CreateGraphicsResources();
     void    DiscardGraphicsResources();
     void    OnPaint();
+    void    Resize();
     //void    OnLButtonDown(int pixelX, int pixelY, DWORD flags);
     //void    OnLButtonUp();
 
@@ -180,6 +246,21 @@ void MainWindow::OnPaint()
             DiscardGraphicsResources();
         }
         EndPaint(m_hwnd, &ps);
+    }
+}
+
+void MainWindow::Resize()
+{
+    if (pRenderTarget != NULL)
+    {
+        RECT rc;
+        GetClientRect(m_hwnd, &rc);
+
+        D2D1_SIZE_U size = D2D1::SizeU(rc.right, rc.bottom);
+
+        pRenderTarget->Resize(size);
+
+        InvalidateRect(m_hwnd, NULL, FALSE);
     }
 }
 
@@ -271,6 +352,8 @@ void ButtonsWindow::SetMode(Mode m)
 
 void ButtonsWindow::OnLButtonDown(int pixelX, int pixelY, DWORD flags)
 {
+    
+    
 }
 
 void ButtonsWindow::OnLButtonUp()
@@ -675,11 +758,11 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
     ShowWindow(win.Window(), nCmdShow);
 
     // Creating buttons
-    // But1
+    // But 1
     ButtonsWindow button1;
 
-    if (!button1.Create(L"Button 1", WS_TABSTOP | WS_VISIBLE | WS_CHILD ,
-        10, 10, 100, 50, win.Window()))
+    if (!button1.Create(L"Button 1", BS_PUSHBUTTON | WS_VISIBLE | WS_CHILD | WS_BORDER,
+        10, 30, 100, 50, win.Window()))
     {
         return 0;
     }
@@ -689,7 +772,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
     ButtonsWindow button2;
 
     if (!button2.Create(L"Button 2", WS_TABSTOP | WS_VISIBLE | WS_CHILD,
-        10, 70, 100, 50, win.Window()))
+        10, 110, 100, 50, win.Window()))
     {
         return 0;
     }
@@ -699,7 +782,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
     ButtonsWindow button3;
 
     if (!button3.Create(L"Button 3", WS_TABSTOP | WS_VISIBLE | WS_CHILD,
-        10, 130, 100, 50, win.Window()))
+        10, 190, 100, 50, win.Window()))
     {
         return 0;
     }
@@ -709,7 +792,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
     ButtonsWindow button4;
 
     if (!button4.Create(L"Button 4", WS_TABSTOP | WS_VISIBLE | WS_CHILD,
-        10, 190, 100, 50, win.Window()))
+        10, 270, 100, 50, win.Window()))
     {
         return 0;
     }
@@ -719,7 +802,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
     ButtonsWindow button5;
 
     if (!button5.Create(L"Button 5", WS_TABSTOP | WS_VISIBLE | WS_CHILD,
-        10, 250, 100, 50, win.Window()))
+        10, 350, 100, 50, win.Window()))
     {
         return 0;
     }
@@ -730,15 +813,12 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
     AlgorithmWindow algwin;
 
     if (!algwin.Create(L"Algorithms", WS_TABSTOP | WS_VISIBLE | WS_CHILD,
-        120, 10, 800, 290, win.Window()))
+        120, 30, 800, 370, win.Window()))
     {
         return 0;
     }
 
     ShowWindow(algwin.Window(), nCmdShow);
-
-
-    
 
     MSG msg;
     while (GetMessage(&msg, NULL, 0, 0))
@@ -747,6 +827,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
         {
             TranslateMessage(&msg);
             DispatchMessage(&msg);
+            
         }
     }
     return 0;
@@ -861,6 +942,7 @@ LRESULT ButtonsWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
         return 0;*/
 
     case WM_LBUTTONDOWN:
+
         OnLButtonDown(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), (DWORD)wParam);
         return 0;
 
@@ -885,6 +967,7 @@ LRESULT ButtonsWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
         return 0;*/
 
     case WM_COMMAND:
+        
         /*switch (LOWORD(wParam))
         {
         case ID_DRAW_MODE:
@@ -923,7 +1006,7 @@ LRESULT MainWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
             return -1;  // Fail CreateWindowEx.
         }
         DPIScale::Initialize(pFactory);
-        //SetMode(SelectMode);
+        //SetMode(SelectMode);        
         return 0;
 
     case WM_DESTROY:
@@ -936,9 +1019,9 @@ LRESULT MainWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
         OnPaint();
         return 0;
 
-    /*case WM_SIZE:
+    case WM_SIZE:
         Resize();
-        return 0;*/
+        return 0;
 
     /*case WM_LBUTTONDOWN:
         OnLButtonDown(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), (DWORD)wParam);
@@ -965,6 +1048,9 @@ LRESULT MainWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
         return 0;*/
 
     case WM_COMMAND:
+
+
+
         /*switch (LOWORD(wParam))
         {
         case ID_DRAW_MODE:
@@ -987,6 +1073,32 @@ LRESULT MainWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
             break;
         }*/
         break;
+        return 0;
+    }
+    return DefWindowProc(m_hwnd, uMsg, wParam, lParam);
+}
+
+LRESULT PopWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+    switch (uMsg)
+    {
+    case WM_CREATE:
+        if (FAILED(D2D1CreateFactory(
+            D2D1_FACTORY_TYPE_SINGLE_THREADED, &pFactory)))
+        {
+            return -1;  // Fail CreateWindowEx.
+        }
+        DPIScale::Initialize(pFactory);
+        //SetMode(SelectMode);        
+        return 0;
+
+    case WM_DESTROY:
+        DiscardGraphicsResources();
+        SafeRelease(&pFactory);
+        PostQuitMessage(0);
+        return 0;
+
+    case WM_COMMAND:
         return 0;
     }
     return DefWindowProc(m_hwnd, uMsg, wParam, lParam);
