@@ -1,4 +1,9 @@
-﻿  main.cpp
+﻿  HullMath.cpp
+C:\Users\adith\Documents\GitHub\Algorithms-For-Games\cpp\HullMath.cpp(6,15): error C2143: syntax error: missing ';' before '<'
+C:\Users\adith\Documents\GitHub\Algorithms-For-Games\cpp\HullMath.cpp(6,15): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
+C:\Users\adith\Documents\GitHub\Algorithms-For-Games\cpp\HullMath.cpp(7,1): error C2143: syntax error: missing ';' before '}'
+C:\Users\adith\Documents\GitHub\Algorithms-For-Games\cpp\HullMath.cpp(7,1): error C2238: unexpected token(s) preceding ';'
+  main.cpp
 C:\Users\adith\Documents\GitHub\Algorithms-For-Games\cpp\QuickHull.cpp(60,27): warning C4018: '>': signed/unsigned mismatch
 C:\Users\adith\Documents\GitHub\Algorithms-For-Games\cpp\QuickHull.cpp(78,13): warning C4244: 'initializing': conversion from 'FLOAT' to 'int', possible loss of data
 C:\Users\adith\Documents\GitHub\Algorithms-For-Games\cpp\QuickHull.cpp(92,13): warning C4244: 'return': conversion from 'float' to 'int', possible loss of data
@@ -25,4 +30,3 @@ C:\Users\adith\Documents\GitHub\Algorithms-For-Games\cpp\Vector2D.cpp(33,17): wa
 C:\Users\adith\Documents\GitHub\Algorithms-For-Games\cpp\Vector2D.cpp(34,17): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
 C:\Users\adith\Documents\GitHub\Algorithms-For-Games\cpp\Vector2D.cpp(93,40): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
   Generating Code...
-  SimpleDrawing.vcxproj -> C:\Users\adith\Documents\GitHub\Algorithms-For-Games\cpp\Debug\SimpleDrawing.exe
