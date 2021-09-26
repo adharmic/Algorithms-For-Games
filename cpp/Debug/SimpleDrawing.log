@@ -5,14 +5,14 @@ C:\Users\adith\Documents\GitHub\Algorithms-For-Games\cpp\QuickHull.cpp(92,13): w
 C:\Users\adith\Documents\GitHub\Algorithms-For-Games\cpp\QuickHull.cpp(99,21): warning C4018: '<': signed/unsigned mismatch
 C:\Users\adith\Documents\GitHub\Algorithms-For-Games\cpp\QuickHull.cpp(123,21): warning C4018: '<': signed/unsigned mismatch
 C:\Users\adith\Documents\GitHub\Algorithms-For-Games\cpp\main.cpp(34,17): warning C4996: 'ID2D1Factory::GetDesktopDpi': Deprecated. Use DisplayInformation::LogicalDpi for Windows Store Apps or GetDpiForWindow for desktop apps.
-C:\Users\adith\Documents\GitHub\Algorithms-For-Games\cpp\main.cpp(168,65): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-C:\Users\adith\Documents\GitHub\Algorithms-For-Games\cpp\main.cpp(168,45): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-C:\Users\adith\Documents\GitHub\Algorithms-For-Games\cpp\main.cpp(182,15): warning C4244: 'initializing': conversion from 'FLOAT' to 'int', possible loss of data
-C:\Users\adith\Documents\GitHub\Algorithms-For-Games\cpp\main.cpp(191,66): warning C4244: 'return': conversion from 'FLOAT' to 'int', possible loss of data
-C:\Users\adith\Documents\GitHub\Algorithms-For-Games\cpp\main.cpp(207,15): warning C4244: 'initializing': conversion from 'FLOAT' to 'int', possible loss of data
-C:\Users\adith\Documents\GitHub\Algorithms-For-Games\cpp\main.cpp(210,23): warning C4018: '<': signed/unsigned mismatch
-C:\Users\adith\Documents\GitHub\Algorithms-For-Games\cpp\main.cpp(211,15): warning C4244: 'initializing': conversion from 'FLOAT' to 'int', possible loss of data
-C:\Users\adith\Documents\GitHub\Algorithms-For-Games\cpp\main.cpp(214,36): warning C4244: '=': conversion from 'FLOAT' to 'int', possible loss of data
+C:\Users\adith\Documents\GitHub\Algorithms-For-Games\cpp\main.cpp(485,63): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\adith\Documents\GitHub\Algorithms-For-Games\cpp\main.cpp(485,44): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\adith\Documents\GitHub\Algorithms-For-Games\cpp\main.cpp(500,15): warning C4244: 'initializing': conversion from 'FLOAT' to 'int', possible loss of data
+C:\Users\adith\Documents\GitHub\Algorithms-For-Games\cpp\main.cpp(509,66): warning C4244: 'return': conversion from 'FLOAT' to 'int', possible loss of data
+C:\Users\adith\Documents\GitHub\Algorithms-For-Games\cpp\main.cpp(525,15): warning C4244: 'initializing': conversion from 'FLOAT' to 'int', possible loss of data
+C:\Users\adith\Documents\GitHub\Algorithms-For-Games\cpp\main.cpp(528,23): warning C4018: '<': signed/unsigned mismatch
+C:\Users\adith\Documents\GitHub\Algorithms-For-Games\cpp\main.cpp(529,15): warning C4244: 'initializing': conversion from 'FLOAT' to 'int', possible loss of data
+C:\Users\adith\Documents\GitHub\Algorithms-For-Games\cpp\main.cpp(532,36): warning C4244: '=': conversion from 'FLOAT' to 'int', possible loss of data
   QuickHull.cpp
 C:\Users\adith\Documents\GitHub\Algorithms-For-Games\cpp\QuickHull.cpp(60,27): warning C4018: '>': signed/unsigned mismatch
 C:\Users\adith\Documents\GitHub\Algorithms-For-Games\cpp\QuickHull.cpp(78,13): warning C4244: 'initializing': conversion from 'FLOAT' to 'int', possible loss of data
