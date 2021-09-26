@@ -51,6 +51,7 @@ public:
 
 float DPIScale::scaleX = 1.0f;
 float DPIScale::scaleY = 1.0f;
+D2D1_ELLIPSE first_point;
 
 struct MyEllipse
 {
@@ -177,6 +178,55 @@ void MainWindow::DiscardGraphicsResources()
     SafeRelease(&pBrush);
 }
 
+int PointOri(D2D1_ELLIPSE p1, D2D1_ELLIPSE p2, D2D1_ELLIPSE p3) {
+    int value = (p2.point.y - p1.point.y) * (p3.point.x - p2.point.x) - (p2.point.x - p1.point.x) * (p3.point.y - p2.point.y);
+
+    if (value == 0) {
+        return 0;
+    }
+    return (value > 0) ? 1 : 2;
+}
+
+int PointDistance(D2D1_ELLIPSE p1, D2D1_ELLIPSE p2) {
+    return (p1.point.x - p2.point.x) * (p1.point.x - p2.point.x) - (p1.point.y - p2.point.y) * (p1.point.y - p2.point.y);
+}
+
+int ComparePoints(const void* vp1, const void* vp2) {
+    D2D1_ELLIPSE* p1 = (D2D1_ELLIPSE*)vp1;
+    D2D1_ELLIPSE* p2 = (D2D1_ELLIPSE*)vp2;
+
+    int ori = PointOri(first_point, *p1, *p2);
+    if (ori == 0) {
+        return (PointDistance(first_point, *p2) >= PointDistance(first_point, *p1)) ? -1 : 1;
+    }
+    return (ori == 2) ? -1 : 1;
+
+}
+
+vector<D2D1_ELLIPSE> SortPoints(vector<D2D1_ELLIPSE> points) {
+    int min_y = points[0].point.y;
+    int min = 0;
+
+    for (int i = 0; i < points.size(); i++) {
+        int y = points[i].point.y;
+
+        if ((y < min_y) || (min_y == y && points[i].point.x < points[min].point.x)) {
+            min_y = points[i].point.y;
+            min = i;
+        }
+    }
+
+    D2D1_ELLIPSE temp = points[0];
+    points[0] = points[min];
+    points[min] = temp;
+
+    first_point = points[0];
+
+    qsort(&points[1], points.size() - 1, sizeof(D2D1_ELLIPSE), ComparePoints);
+
+    return points;
+}
+
 void MainWindow::OnPaint()
 {
     HRESULT hr = CreateGraphicsResources();
@@ -185,7 +235,7 @@ void MainWindow::OnPaint()
         PAINTSTRUCT ps;
         BeginPaint(m_hwnd, &ps);
 
-        list<D2D1_ELLIPSE> *hullpoints = new list<D2D1_ELLIPSE>;
+        vector<D2D1_ELLIPSE> *hullpoints = new vector<D2D1_ELLIPSE>;
      
         pRenderTarget->BeginDraw();
 
@@ -199,7 +249,9 @@ void MainWindow::OnPaint()
 
         QuickHull *qhull = new QuickHull(*hullpoints);
 
-        list<D2D1_ELLIPSE> quick_hull_points = (qhull)->GetConvexHull();
+        vector<D2D1_ELLIPSE> q_points = (qhull)->GetConvexHull();
+
+        vector<D2D1_ELLIPSE> quick_hull_points = SortPoints(q_points);
 
         printf("%d\n", quick_hull_points.size());
 

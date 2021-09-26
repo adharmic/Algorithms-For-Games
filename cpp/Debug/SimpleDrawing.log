@@ -1,2 +1,28 @@
-﻿  QuickHull.cpp
-  SimpleDrawing.vcxproj -> C:\Users\Adithya\Documents\GitHub\Algorithms-For-Games\cpp\Debug\SimpleDrawing.exe
+﻿  main.cpp
+C:\Users\adith\Documents\GitHub\Algorithms-For-Games\cpp\QuickHull.cpp(60,27): warning C4018: '>': signed/unsigned mismatch
+C:\Users\adith\Documents\GitHub\Algorithms-For-Games\cpp\QuickHull.cpp(78,13): warning C4244: 'initializing': conversion from 'FLOAT' to 'int', possible loss of data
+C:\Users\adith\Documents\GitHub\Algorithms-For-Games\cpp\QuickHull.cpp(92,13): warning C4244: 'return': conversion from 'float' to 'int', possible loss of data
+C:\Users\adith\Documents\GitHub\Algorithms-For-Games\cpp\QuickHull.cpp(99,21): warning C4018: '<': signed/unsigned mismatch
+C:\Users\adith\Documents\GitHub\Algorithms-For-Games\cpp\QuickHull.cpp(123,21): warning C4018: '<': signed/unsigned mismatch
+C:\Users\adith\Documents\GitHub\Algorithms-For-Games\cpp\main.cpp(34,17): warning C4996: 'ID2D1Factory::GetDesktopDpi': Deprecated. Use DisplayInformation::LogicalDpi for Windows Store Apps or GetDpiForWindow for desktop apps.
+C:\Users\adith\Documents\GitHub\Algorithms-For-Games\cpp\main.cpp(168,65): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\adith\Documents\GitHub\Algorithms-For-Games\cpp\main.cpp(168,45): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\adith\Documents\GitHub\Algorithms-For-Games\cpp\main.cpp(182,15): warning C4244: 'initializing': conversion from 'FLOAT' to 'int', possible loss of data
+C:\Users\adith\Documents\GitHub\Algorithms-For-Games\cpp\main.cpp(191,66): warning C4244: 'return': conversion from 'FLOAT' to 'int', possible loss of data
+C:\Users\adith\Documents\GitHub\Algorithms-For-Games\cpp\main.cpp(207,15): warning C4244: 'initializing': conversion from 'FLOAT' to 'int', possible loss of data
+C:\Users\adith\Documents\GitHub\Algorithms-For-Games\cpp\main.cpp(210,23): warning C4018: '<': signed/unsigned mismatch
+C:\Users\adith\Documents\GitHub\Algorithms-For-Games\cpp\main.cpp(211,15): warning C4244: 'initializing': conversion from 'FLOAT' to 'int', possible loss of data
+C:\Users\adith\Documents\GitHub\Algorithms-For-Games\cpp\main.cpp(214,36): warning C4244: '=': conversion from 'FLOAT' to 'int', possible loss of data
+  QuickHull.cpp
+C:\Users\adith\Documents\GitHub\Algorithms-For-Games\cpp\QuickHull.cpp(60,27): warning C4018: '>': signed/unsigned mismatch
+C:\Users\adith\Documents\GitHub\Algorithms-For-Games\cpp\QuickHull.cpp(78,13): warning C4244: 'initializing': conversion from 'FLOAT' to 'int', possible loss of data
+C:\Users\adith\Documents\GitHub\Algorithms-For-Games\cpp\QuickHull.cpp(92,13): warning C4244: 'return': conversion from 'float' to 'int', possible loss of data
+C:\Users\adith\Documents\GitHub\Algorithms-For-Games\cpp\QuickHull.cpp(99,21): warning C4018: '<': signed/unsigned mismatch
+C:\Users\adith\Documents\GitHub\Algorithms-For-Games\cpp\QuickHull.cpp(123,21): warning C4018: '<': signed/unsigned mismatch
+  Vector2D.cpp
+C:\Users\adith\Documents\GitHub\Algorithms-For-Games\cpp\Vector2D.cpp(32,17): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\adith\Documents\GitHub\Algorithms-For-Games\cpp\Vector2D.cpp(33,17): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\adith\Documents\GitHub\Algorithms-For-Games\cpp\Vector2D.cpp(34,17): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\adith\Documents\GitHub\Algorithms-For-Games\cpp\Vector2D.cpp(93,40): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+  Generating Code...
+  SimpleDrawing.vcxproj -> C:\Users\adith\Documents\GitHub\Algorithms-For-Games\cpp\Debug\SimpleDrawing.exe
