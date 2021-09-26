@@ -55,6 +55,14 @@ class HullMath {
 	*  By definition, they cannot intersect without one of the points being inside the other hull.
 	*/
 	static bool HullsIntersecting(vector<D2D1_ELLIPSE> hull1, vector<D2D1_ELLIPSE> hull2) {
+		for (int i = 0; i < hull1.size(); i++) {
+			if (ContainsPoint(hull2, hull1[i])) {
+				return true;
+			}
+			if (ContainsPoint(hull1, hull2[i])) {
+				return true;
+			}
+		}
 		return false;
 	}
 
