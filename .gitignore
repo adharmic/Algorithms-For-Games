@@ -386,3 +386,5 @@ FodyWeavers.xsd
 # JetBrains Rider
 .idea/
 *.sln.iml
+cpp/.vs/SimpleDrawing/v16/Browse.VC.db
+cpp/.vs/SimpleDrawing/v16/.suo
