@@ -23,6 +23,14 @@ class HullMath {
 	*/
 	static void TranslateHull(vector<D2D1_ELLIPSE> hull, int dir) {
 
+		// 500 is a temporary value. We will figure out how to access the window centers later.
+		int center_x = 500 * dir;
+		int center_y = 500 * dir;
+
+		for each (D2D1_ELLIPSE var in hull) {
+			var.point.x = var.point.x + center_x;
+			var.point.y = var.point.y + center_y;
+		}
 	}
 
 	/* ContainsPoint will receive a point and determine if it is inside the given hull. 
