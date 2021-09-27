@@ -79,71 +79,6 @@ struct MyEllipse
 
 D2D1::ColorF::Enum colors[] = { D2D1::ColorF::Yellow, D2D1::ColorF::Salmon, D2D1::ColorF::LimeGreen };
 
-//POP-UP window for testing
-class PopWindow : public BaseWindow<PopWindow>
-{
-    enum Mode
-    {
-    };
-
-    HCURSOR                 hCursor;
-
-    ID2D1Factory* pFactory;
-    ID2D1HwndRenderTarget* pRenderTarget;
-    ID2D1SolidColorBrush* pBrush;
-    D2D1_POINT_2F           ptMouse;
-
-    Mode                    mode;
-    size_t                  nextColor;
-
-
-
-    HRESULT CreateGraphicsResources();
-    void    DiscardGraphicsResources();
-
-public:
-
-    PopWindow() : pFactory(NULL), pRenderTarget(NULL), pBrush(NULL),
-        ptMouse(D2D1::Point2F()), nextColor(0)
-        //, selection(ellipses.end())
-    {
-    }
-
-    PCWSTR  ClassName() const { return L"Button Window Class"; }
-    LRESULT HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam);
-};
-
-HRESULT PopWindow::CreateGraphicsResources()
-{
-    HRESULT hr = S_OK;
-    if (pRenderTarget == NULL)
-    {
-        RECT rc;
-        GetClientRect(m_hwnd, &rc);
-
-        D2D1_SIZE_U size = D2D1::SizeU(rc.right, rc.bottom);
-
-        hr = pFactory->CreateHwndRenderTarget(
-            D2D1::RenderTargetProperties(),
-            D2D1::HwndRenderTargetProperties(m_hwnd, size),
-            &pRenderTarget);
-
-        if (SUCCEEDED(hr))
-        {
-            const D2D1_COLOR_F color = D2D1::ColorF(0, 0, 0);
-            hr = pRenderTarget->CreateSolidColorBrush(color, &pBrush);
-
-
-        }
-    }
-    return hr;
-}
-
-void PopWindow::DiscardGraphicsResources()
-{
-    SafeRelease(&pRenderTarget);
-    SafeRelease(&pBrush);
-}
 
 //Base window
 class MainWindow : public BaseWindow<MainWindow>
@@ -176,8 +111,8 @@ class MainWindow : public BaseWindow<MainWindow>
 
 public:
 
-    MainWindow() : pFactory(NULL), pRenderTarget(NULL), pBrush(NULL),
-        ptMouse(D2D1::Point2F()), nextColor(0)
+    MainWindow() : pFactory(NULL), pRenderTarget(NULL), pBrush(NULL)
+        //ptMouse(D2D1::Point2F()), nextColor(0)
         //, selection(ellipses.end())
     {
     }
@@ -267,8 +202,8 @@ void MainWindow::Resize()
 
 
 
-//Button window
-class ButtonsWindow : public BaseWindow<ButtonsWindow>
+//Button 1 window
+class Button1Window : public BaseWindow<Button1Window>
 {
     enum Mode
     {
@@ -285,22 +220,17 @@ class ButtonsWindow : public BaseWindow<ButtonsWindow>
     Mode                    mode;
     size_t                  nextColor;
 
-
-    /*MyEllipse PointFarthestFromEdge(MyEllipse a, MyEllipse b, list<shared_ptr<MyEllipse>> p);
-    bool    Contains(list<MyEllipse> points, MyEllipse to_be_found);*/
-
-    void    SetMode(Mode m);
     HRESULT CreateGraphicsResources();
     void    DiscardGraphicsResources();
+    void    SetMode(Mode m);
     void    OnPaint();
     void    OnLButtonDown(int pixelX, int pixelY, DWORD flags);
     void    OnLButtonUp();
 
 public:
 
-    ButtonsWindow() : pFactory(NULL), pRenderTarget(NULL), pBrush(NULL),
+    Button1Window() : pFactory(NULL), pRenderTarget(NULL), pBrush(NULL),
         ptMouse(D2D1::Point2F()), nextColor(0)
-        //, selection(ellipses.end())
     {
     }
 
@@ -308,13 +238,16 @@ public:
     LRESULT HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam);
 };
 
-HRESULT ButtonsWindow::CreateGraphicsResources()
+HRESULT Button1Window::CreateGraphicsResources()
 {
     HRESULT hr = S_OK;
     if (pRenderTarget == NULL)
     {
         RECT rc;
         GetClientRect(m_hwnd, &rc);
+
+        PAINTSTRUCT ps;
+        HDC hdc = BeginPaint(m_hwnd, &ps);
 
         D2D1_SIZE_U size = D2D1::SizeU(rc.right, rc.bottom);
 
@@ -323,73 +256,482 @@ HRESULT ButtonsWindow::CreateGraphicsResources()
             D2D1::HwndRenderTargetProperties(m_hwnd, size),
             &pRenderTarget);
 
+        EndPaint(m_hwnd, &ps);
+
         if (SUCCEEDED(hr))
         {
             const D2D1_COLOR_F color = D2D1::ColorF(0, 0, 0);
             hr = pRenderTarget->CreateSolidColorBrush(color, &pBrush);
-            
-
         }
     }
     return hr;
 }
 
-void ButtonsWindow::DiscardGraphicsResources()
+void Button1Window::DiscardGraphicsResources()
 {
     SafeRelease(&pRenderTarget);
     SafeRelease(&pBrush);
 }
 
-void ButtonsWindow::SetMode(Mode m)
+void Button1Window::OnLButtonDown(int pixelX, int pixelY, DWORD flags)
+{
+    
+    
+}
+
+void Button1Window::OnLButtonUp()
+{
+}
+
+void Button1Window::OnPaint()
+{
+    PAINTSTRUCT ps;
+    HDC hdc = BeginPaint(m_hwnd, &ps);
+
+    TextOut(hdc,
+        // Location of the text
+        0,
+        5,
+        // Text to print
+        L"Minkowski",
+        // Size of the text, my function gets this for us
+        sizeof("Minkowski"));
+
+    TextOut(hdc,
+        // Location of the text
+        0,
+        25,
+        // Text to print
+        L"Difference",
+        // Size of the text, my function gets this for us
+        sizeof("Difference"));
+
+    EndPaint(m_hwnd, &ps);
+    HRESULT hr = CreateGraphicsResources();
+    if (SUCCEEDED(hr))
+    {        
+     
+    }
+}
+
+void Button1Window::SetMode(Mode m)
 {
     mode = m;
 
     LPWSTR cursor;
     cursor = IDC_HAND;
-
+    
     hCursor = LoadCursor(NULL, cursor);
     SetCursor(hCursor);
 }
 
-void ButtonsWindow::OnLButtonDown(int pixelX, int pixelY, DWORD flags)
+//Button 2 window
+class Button2Window : public BaseWindow<Button2Window>
 {
-    
-    
+
+    HCURSOR                 hCursor;
+
+    ID2D1Factory* pFactory;
+    ID2D1HwndRenderTarget* pRenderTarget;
+    ID2D1SolidColorBrush* pBrush;
+    D2D1_POINT_2F           ptMouse;
+
+    size_t                  nextColor;
+
+
+    HRESULT CreateGraphicsResources();
+    void    DiscardGraphicsResources();
+    void    OnPaint();
+    void    OnLButtonDown(int pixelX, int pixelY, DWORD flags);
+    void    OnLButtonUp();
+
+public:
+
+    Button2Window() : pFactory(NULL), pRenderTarget(NULL), pBrush(NULL),
+        ptMouse(D2D1::Point2F()), nextColor(0)
+    {
+    }
+
+    PCWSTR  ClassName() const { return L"Button Window Class"; }
+    LRESULT HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam);
+};
+
+HRESULT Button2Window::CreateGraphicsResources()
+{
+    HRESULT hr = S_OK;
+    if (pRenderTarget == NULL)
+    {
+        RECT rc;
+        GetClientRect(m_hwnd, &rc);
+
+        PAINTSTRUCT ps;
+        HDC hdc = BeginPaint(m_hwnd, &ps);
+
+        D2D1_SIZE_U size = D2D1::SizeU(rc.right, rc.bottom);
+
+        hr = pFactory->CreateHwndRenderTarget(
+            D2D1::RenderTargetProperties(),
+            D2D1::HwndRenderTargetProperties(m_hwnd, size),
+            &pRenderTarget);
+
+        EndPaint(m_hwnd, &ps);
+
+        if (SUCCEEDED(hr))
+        {
+            const D2D1_COLOR_F color = D2D1::ColorF(0, 0, 0);
+            hr = pRenderTarget->CreateSolidColorBrush(color, &pBrush);
+        }
+    }
+    return hr;
 }
 
-void ButtonsWindow::OnLButtonUp()
+void Button2Window::DiscardGraphicsResources()
+{
+    SafeRelease(&pRenderTarget);
+    SafeRelease(&pBrush);
+}
+
+void Button2Window::OnLButtonDown(int pixelX, int pixelY, DWORD flags)
+{
+
+
+}
+
+void Button2Window::OnLButtonUp()
 {
 }
 
-void ButtonsWindow::OnPaint()
+void Button2Window::OnPaint()
 {
+    PAINTSTRUCT ps;
+    HDC hdc = BeginPaint(m_hwnd, &ps);
+
+    TextOut(hdc,
+        // Location of the text
+        0,
+        5,
+        // Text to print
+        L"Minkowski",
+        // Size of the text, my function gets this for us
+        sizeof("Minkowski"));
+
+    TextOut(hdc,
+        // Location of the text
+        0,
+        25,
+        // Text to print
+        L"Sum",
+        // Size of the text, my function gets this for us
+        sizeof("Sum"));
+
+    EndPaint(m_hwnd, &ps);
     HRESULT hr = CreateGraphicsResources();
     if (SUCCEEDED(hr))
     {
+
+    }
+}
+
+//Button 3 window
+class Button3Window : public BaseWindow<Button3Window>
+{
+
+    HCURSOR                 hCursor;
+
+    ID2D1Factory* pFactory;
+    ID2D1HwndRenderTarget* pRenderTarget;
+    ID2D1SolidColorBrush* pBrush;
+    D2D1_POINT_2F           ptMouse;
+
+    size_t                  nextColor;
+
+
+    HRESULT CreateGraphicsResources();
+    void    DiscardGraphicsResources();
+    void    OnPaint();
+    void    OnLButtonDown(int pixelX, int pixelY, DWORD flags);
+    void    OnLButtonUp();
+
+public:
+
+    Button3Window() : pFactory(NULL), pRenderTarget(NULL), pBrush(NULL),
+        ptMouse(D2D1::Point2F()), nextColor(0)
+    {
+    }
+
+    PCWSTR  ClassName() const { return L"Button Window Class"; }
+    LRESULT HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam);
+};
+
+HRESULT Button3Window::CreateGraphicsResources()
+{
+    HRESULT hr = S_OK;
+    if (pRenderTarget == NULL)
+    {
+        RECT rc;
+        GetClientRect(m_hwnd, &rc);
+
         PAINTSTRUCT ps;
-        BeginPaint(m_hwnd, &ps);
+        HDC hdc = BeginPaint(m_hwnd, &ps);
 
-        pRenderTarget->BeginDraw();
+        D2D1_SIZE_U size = D2D1::SizeU(rc.right, rc.bottom);
 
-        pRenderTarget->Clear(D2D1::ColorF(D2D1::ColorF::Yellow));
+        hr = pFactory->CreateHwndRenderTarget(
+            D2D1::RenderTargetProperties(),
+            D2D1::HwndRenderTargetProperties(m_hwnd, size),
+            &pRenderTarget);
 
-        /*for (auto i = ellipses.begin(); i != ellipses.end(); ++i)
-        {
-            (*i)->Draw(pRenderTarget, pBrush);
-        }
-
-        if (Selection())
-        {
-            pBrush->SetColor(D2D1::ColorF(D2D1::ColorF::Red));
-            pRenderTarget->DrawEllipse(Selection()->ellipse, pBrush, 2.0f);
-        }*/
-
-        hr = pRenderTarget->EndDraw();
-        if (FAILED(hr) || hr == D2DERR_RECREATE_TARGET)
-        {
-            DiscardGraphicsResources();
-        }
         EndPaint(m_hwnd, &ps);
+
+        if (SUCCEEDED(hr))
+        {
+            const D2D1_COLOR_F color = D2D1::ColorF(0, 0, 0);
+            hr = pRenderTarget->CreateSolidColorBrush(color, &pBrush);
+        }
+    }
+    return hr;
+}
+
+void Button3Window::DiscardGraphicsResources()
+{
+    SafeRelease(&pRenderTarget);
+    SafeRelease(&pBrush);
+}
+
+void Button3Window::OnLButtonDown(int pixelX, int pixelY, DWORD flags)
+{
+
+
+}
+
+void Button3Window::OnLButtonUp()
+{
+}
+
+void Button3Window::OnPaint()
+{
+    PAINTSTRUCT ps;
+    HDC hdc = BeginPaint(m_hwnd, &ps);
+
+    TextOut(hdc,
+        // Location of the text
+        0,
+        15,
+        // Text to print
+        L"Quickhull",
+        // Size of the text, my function gets this for us
+        sizeof("Quickhull"));
+
+    EndPaint(m_hwnd, &ps);
+    HRESULT hr = CreateGraphicsResources();
+    if (SUCCEEDED(hr))
+    {
+
+    }
+}
+
+//Button 4 window
+class Button4Window : public BaseWindow<Button4Window>
+{
+
+    HCURSOR                 hCursor;
+
+    ID2D1Factory* pFactory;
+    ID2D1HwndRenderTarget* pRenderTarget;
+    ID2D1SolidColorBrush* pBrush;
+    D2D1_POINT_2F           ptMouse;
+
+    size_t                  nextColor;
+
+
+    HRESULT CreateGraphicsResources();
+    void    DiscardGraphicsResources();
+    void    OnPaint();
+    void    OnLButtonDown(int pixelX, int pixelY, DWORD flags);
+    void    OnLButtonUp();
+
+public:
+
+    Button4Window() : pFactory(NULL), pRenderTarget(NULL), pBrush(NULL),
+        ptMouse(D2D1::Point2F()), nextColor(0)
+    {
+    }
+
+    PCWSTR  ClassName() const { return L"Button Window Class"; }
+    LRESULT HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam);
+};
+
+HRESULT Button4Window::CreateGraphicsResources()
+{
+    HRESULT hr = S_OK;
+    if (pRenderTarget == NULL)
+    {
+        RECT rc;
+        GetClientRect(m_hwnd, &rc);
+
+        PAINTSTRUCT ps;
+        HDC hdc = BeginPaint(m_hwnd, &ps);
+
+        D2D1_SIZE_U size = D2D1::SizeU(rc.right, rc.bottom);
+
+        hr = pFactory->CreateHwndRenderTarget(
+            D2D1::RenderTargetProperties(),
+            D2D1::HwndRenderTargetProperties(m_hwnd, size),
+            &pRenderTarget);
+
+        EndPaint(m_hwnd, &ps);
+
+        if (SUCCEEDED(hr))
+        {
+            const D2D1_COLOR_F color = D2D1::ColorF(0, 0, 0);
+            hr = pRenderTarget->CreateSolidColorBrush(color, &pBrush);
+        }
+    }
+    return hr;
+}
+
+void Button4Window::DiscardGraphicsResources()
+{
+    SafeRelease(&pRenderTarget);
+    SafeRelease(&pBrush);
+}
+
+void Button4Window::OnLButtonDown(int pixelX, int pixelY, DWORD flags)
+{
+
+
+}
+
+void Button4Window::OnLButtonUp()
+{
+}
+
+void Button4Window::OnPaint()
+{
+    PAINTSTRUCT ps;
+    HDC hdc = BeginPaint(m_hwnd, &ps);
+
+    TextOut(hdc,
+        // Location of the text
+        0,
+        5,
+        // Text to print
+        L"Point Convex",
+        // Size of the text, my function gets this for us
+        sizeof("Point Convex"));
+
+    TextOut(hdc,
+        // Location of the text
+        0,
+        25,
+        // Text to print
+        L"Hull",
+        // Size of the text, my function gets this for us
+        sizeof("Hull"));
+
+    EndPaint(m_hwnd, &ps);
+    HRESULT hr = CreateGraphicsResources();
+    if (SUCCEEDED(hr))
+    {
+
+    }
+}
+
+//Button 5 window
+class Button5Window : public BaseWindow<Button5Window>
+{
+
+    HCURSOR                 hCursor;
+
+    ID2D1Factory* pFactory;
+    ID2D1HwndRenderTarget* pRenderTarget;
+    ID2D1SolidColorBrush* pBrush;
+    D2D1_POINT_2F           ptMouse;
+
+    size_t                  nextColor;
+
+
+    HRESULT CreateGraphicsResources();
+    void    DiscardGraphicsResources();
+    void    OnPaint();
+    void    OnLButtonDown(int pixelX, int pixelY, DWORD flags);
+    void    OnLButtonUp();
+
+public:
+
+    Button5Window() : pFactory(NULL), pRenderTarget(NULL), pBrush(NULL),
+        ptMouse(D2D1::Point2F()), nextColor(0)
+    {
+    }
+
+    PCWSTR  ClassName() const { return L"Button Window Class"; }
+    LRESULT HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam);
+};
+
+HRESULT Button5Window::CreateGraphicsResources()
+{
+    HRESULT hr = S_OK;
+    if (pRenderTarget == NULL)
+    {
+        RECT rc;
+        GetClientRect(m_hwnd, &rc);
+
+        PAINTSTRUCT ps;
+        HDC hdc = BeginPaint(m_hwnd, &ps);
+
+        D2D1_SIZE_U size = D2D1::SizeU(rc.right, rc.bottom);
+
+        hr = pFactory->CreateHwndRenderTarget(
+            D2D1::RenderTargetProperties(),
+            D2D1::HwndRenderTargetProperties(m_hwnd, size),
+            &pRenderTarget);
+
+        EndPaint(m_hwnd, &ps);
+
+        if (SUCCEEDED(hr))
+        {
+            const D2D1_COLOR_F color = D2D1::ColorF(0, 0, 0);
+            hr = pRenderTarget->CreateSolidColorBrush(color, &pBrush);
+        }
+    }
+    return hr;
+}
+
+void Button5Window::DiscardGraphicsResources()
+{
+    SafeRelease(&pRenderTarget);
+    SafeRelease(&pBrush);
+}
+
+void Button5Window::OnLButtonDown(int pixelX, int pixelY, DWORD flags)
+{
+
+
+}
+
+void Button5Window::OnLButtonUp()
+{
+}
+
+void Button5Window::OnPaint()
+{
+    PAINTSTRUCT ps;
+    HDC hdc = BeginPaint(m_hwnd, &ps);
+
+    TextOut(hdc,
+        // Location of the text
+        0,
+        25,
+        // Text to print
+        L"GJK",
+        // Size of the text, my function gets this for us
+        sizeof("GJK"));
+
+    EndPaint(m_hwnd, &ps);
+    HRESULT hr = CreateGraphicsResources();
+    if (SUCCEEDED(hr))
+    {
+
     }
 }
 
@@ -557,7 +899,7 @@ void AlgorithmWindow::OnPaint()
 
         pRenderTarget->BeginDraw();
 
-        pRenderTarget->Clear(D2D1::ColorF(D2D1::ColorF::SkyBlue));
+        pRenderTarget->Clear(D2D1::ColorF(D2D1::ColorF::White));
 
         for (auto i = ellipses.begin(); i != ellipses.end(); ++i)
         {
@@ -795,14 +1137,14 @@ void AlgorithmWindow::SetMode(Mode m)
 }
 
 
-
+AlgorithmWindow algwin;
 //MAIN PROGRAM
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 {
     MainWindow win;
 
-    if (!win.Create(L"Draw Circles", WS_OVERLAPPEDWINDOW))
+    if (!win.Create(L"Gaming algorithms", WS_OVERLAPPEDWINDOW))
     {
         return 0;
     }
@@ -813,7 +1155,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
 
     // Creating buttons
     // But 1
-    ButtonsWindow button1;
+    Button1Window button1;
 
     if (!button1.Create(L"Button 1", BS_PUSHBUTTON | WS_VISIBLE | WS_CHILD | WS_BORDER,
         10, 30, 100, 50, win.Window()))
@@ -822,8 +1164,9 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
     }
 
     ShowWindow(button1.Window(), nCmdShow);
+    
     // But2
-    ButtonsWindow button2;
+    Button2Window button2;
 
     if (!button2.Create(L"Button 2", WS_TABSTOP | WS_VISIBLE | WS_CHILD,
         10, 110, 100, 50, win.Window()))
@@ -832,8 +1175,9 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
     }
 
     ShowWindow(button2.Window(), nCmdShow);
+    
     // But3
-    ButtonsWindow button3;
+    Button3Window button3;
 
     if (!button3.Create(L"Button 3", WS_TABSTOP | WS_VISIBLE | WS_CHILD,
         10, 190, 100, 50, win.Window()))
@@ -842,8 +1186,9 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
     }
 
     ShowWindow(button3.Window(), nCmdShow);
+    
     // But4
-    ButtonsWindow button4;
+    Button4Window button4;
 
     if (!button4.Create(L"Button 4", WS_TABSTOP | WS_VISIBLE | WS_CHILD,
         10, 270, 100, 50, win.Window()))
@@ -852,8 +1197,9 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
     }
 
     ShowWindow(button4.Window(), nCmdShow);
+    
     // But5
-    ButtonsWindow button5;
+    Button5Window button5;
 
     if (!button5.Create(L"Button 5", WS_TABSTOP | WS_VISIBLE | WS_CHILD,
         10, 350, 100, 50, win.Window()))
@@ -862,10 +1208,8 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
     }
 
     ShowWindow(button5.Window(), nCmdShow);
-
+    
     // Algorithm Window
-    AlgorithmWindow algwin;
-
     if (!algwin.Create(L"Algorithms", WS_TABSTOP | WS_VISIBLE | WS_CHILD,
         120, 30, 800, 370, win.Window()))
     {
@@ -967,7 +1311,7 @@ LRESULT AlgorithmWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
     return DefWindowProc(m_hwnd, uMsg, wParam, lParam);
 }
 
-LRESULT ButtonsWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
+LRESULT Button1Window::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
     switch (uMsg)
     {
@@ -978,7 +1322,7 @@ LRESULT ButtonsWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
             return -1;  // Fail CreateWindowEx.
         }
         DPIScale::Initialize(pFactory);
-        SetMode(SelectMode);
+        SetMode(SelectMode); 
         return 0;
 
     case WM_DESTROY:
@@ -989,14 +1333,70 @@ LRESULT ButtonsWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 
     case WM_PAINT:
         OnPaint();
-        return 0;
-
-    /*case WM_SIZE:
-        Resize();
-        return 0;*/
+        break;
 
     case WM_LBUTTONDOWN:
+    {
+        //OnLButtonDown(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), (DWORD)wParam);
+        return 0;
+    }
+    case WM_LBUTTONUP:
+        OnLButtonUp();
+        return 0;
 
+    case WM_COMMAND:
+        
+        /*switch (LOWORD(wParam))
+        {
+        case ID_DRAW_MODE:
+            SetMode(DrawMode);
+            break;
+
+        case ID_SELECT_MODE:
+            SetMode(SelectMode);
+            break;
+
+        case ID_TOGGLE_MODE:
+            if (mode == DrawMode)
+            {
+                SetMode(SelectMode);
+            }
+            else
+            {
+                SetMode(DrawMode);
+            }
+            break;
+        }*/
+        break;
+        return 0;
+    }
+    return DefWindowProc(m_hwnd, uMsg, wParam, lParam);
+}
+
+LRESULT Button2Window::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+    switch (uMsg)
+    {
+    case WM_CREATE:
+        if (FAILED(D2D1CreateFactory(
+            D2D1_FACTORY_TYPE_SINGLE_THREADED, &pFactory)))
+        {
+            return -1;  // Fail CreateWindowEx.
+        }
+        DPIScale::Initialize(pFactory);
+        return 0;
+
+    case WM_DESTROY:
+        DiscardGraphicsResources();
+        SafeRelease(&pFactory);
+        PostQuitMessage(0);
+        return 0;
+
+    case WM_PAINT:
+        OnPaint();
+        break;
+
+    case WM_LBUTTONDOWN:
         OnLButtonDown(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), (DWORD)wParam);
         return 0;
 
@@ -1004,24 +1404,188 @@ LRESULT ButtonsWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
         OnLButtonUp();
         return 0;
 
-    /*case WM_MOUSEMOVE:
-        OnMouseMove(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), (DWORD)wParam);
-        return 0;*/
+    case WM_COMMAND:
 
-    /*case WM_SETCURSOR:
-        if (LOWORD(lParam) == HTCLIENT)
+        /*switch (LOWORD(wParam))
         {
-            SetCursor(hCursor);
-            return TRUE;
-        }
-        break;*/
+        case ID_DRAW_MODE:
+            SetMode(DrawMode);
+            break;
 
-    /*case WM_KEYDOWN:
-        OnKeyDown((UINT)wParam);
-        return 0;*/
+        case ID_SELECT_MODE:
+            SetMode(SelectMode);
+            break;
+
+        case ID_TOGGLE_MODE:
+            if (mode == DrawMode)
+            {
+                SetMode(SelectMode);
+            }
+            else
+            {
+                SetMode(DrawMode);
+            }
+            break;
+        }*/
+        break;
+        return 0;
+    }
+    return DefWindowProc(m_hwnd, uMsg, wParam, lParam);
+}
+
+LRESULT Button3Window::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+    switch (uMsg)
+    {
+    case WM_CREATE:
+        if (FAILED(D2D1CreateFactory(
+            D2D1_FACTORY_TYPE_SINGLE_THREADED, &pFactory)))
+        {
+            return -1;  // Fail CreateWindowEx.
+        }
+        DPIScale::Initialize(pFactory);
+        return 0;
+
+    case WM_DESTROY:
+        DiscardGraphicsResources();
+        SafeRelease(&pFactory);
+        PostQuitMessage(0);
+        return 0;
+
+    case WM_PAINT:
+        OnPaint();
+        break;
+
+    case WM_LBUTTONDOWN:
+        OnLButtonDown(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), (DWORD)wParam);
+        return 0;
+
+    case WM_LBUTTONUP:
+        OnLButtonUp();
+        return 0;
 
     case WM_COMMAND:
-        
+
+        /*switch (LOWORD(wParam))
+        {
+        case ID_DRAW_MODE:
+            SetMode(DrawMode);
+            break;
+
+        case ID_SELECT_MODE:
+            SetMode(SelectMode);
+            break;
+
+        case ID_TOGGLE_MODE:
+            if (mode == DrawMode)
+            {
+                SetMode(SelectMode);
+            }
+            else
+            {
+                SetMode(DrawMode);
+            }
+            break;
+        }*/
+        break;
+        return 0;
+    }
+    return DefWindowProc(m_hwnd, uMsg, wParam, lParam);
+}
+
+LRESULT Button4Window::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+    switch (uMsg)
+    {
+    case WM_CREATE:
+        if (FAILED(D2D1CreateFactory(
+            D2D1_FACTORY_TYPE_SINGLE_THREADED, &pFactory)))
+        {
+            return -1;  // Fail CreateWindowEx.
+        }
+        DPIScale::Initialize(pFactory);
+        return 0;
+
+    case WM_DESTROY:
+        DiscardGraphicsResources();
+        SafeRelease(&pFactory);
+        PostQuitMessage(0);
+        return 0;
+
+    case WM_PAINT:
+        OnPaint();
+        break;
+
+    case WM_LBUTTONDOWN:
+        OnLButtonDown(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), (DWORD)wParam);
+        return 0;
+
+    case WM_LBUTTONUP:
+        OnLButtonUp();
+        return 0;
+
+    case WM_COMMAND:
+
+        /*switch (LOWORD(wParam))
+        {
+        case ID_DRAW_MODE:
+            SetMode(DrawMode);
+            break;
+
+        case ID_SELECT_MODE:
+            SetMode(SelectMode);
+            break;
+
+        case ID_TOGGLE_MODE:
+            if (mode == DrawMode)
+            {
+                SetMode(SelectMode);
+            }
+            else
+            {
+                SetMode(DrawMode);
+            }
+            break;
+        }*/
+        break;
+        return 0;
+    }
+    return DefWindowProc(m_hwnd, uMsg, wParam, lParam);
+}
+
+LRESULT Button5Window::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+    switch (uMsg)
+    {
+    case WM_CREATE:
+        if (FAILED(D2D1CreateFactory(
+            D2D1_FACTORY_TYPE_SINGLE_THREADED, &pFactory)))
+        {
+            return -1;  // Fail CreateWindowEx.
+        }
+        DPIScale::Initialize(pFactory);
+        return 0;
+
+    case WM_DESTROY:
+        DiscardGraphicsResources();
+        SafeRelease(&pFactory);
+        PostQuitMessage(0);
+        return 0;
+
+    case WM_PAINT:
+        OnPaint();
+        break;
+
+    case WM_LBUTTONDOWN:
+        OnLButtonDown(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), (DWORD)wParam);
+        return 0;
+
+    case WM_LBUTTONUP:
+        OnLButtonUp();
+        return 0;
+
+    case WM_COMMAND:
+
         /*switch (LOWORD(wParam))
         {
         case ID_DRAW_MODE:
@@ -1127,32 +1691,6 @@ LRESULT MainWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
             break;
         }*/
         break;
-        return 0;
-    }
-    return DefWindowProc(m_hwnd, uMsg, wParam, lParam);
-}
-
-LRESULT PopWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
-{
-    switch (uMsg)
-    {
-    case WM_CREATE:
-        if (FAILED(D2D1CreateFactory(
-            D2D1_FACTORY_TYPE_SINGLE_THREADED, &pFactory)))
-        {
-            return -1;  // Fail CreateWindowEx.
-        }
-        DPIScale::Initialize(pFactory);
-        //SetMode(SelectMode);        
-        return 0;
-
-    case WM_DESTROY:
-        DiscardGraphicsResources();
-        SafeRelease(&pFactory);
-        PostQuitMessage(0);
-        return 0;
-
-    case WM_COMMAND:
         return 0;
     }
     return DefWindowProc(m_hwnd, uMsg, wParam, lParam);
