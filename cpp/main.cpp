@@ -12,6 +12,7 @@ using namespace std;
 #include "basewin.h"
 #include "resource.h"
 #include "QuickHull.cpp"
+#include "HullMath.cpp"
 
 template <class T> void SafeRelease(T **ppT)
 {
@@ -953,26 +954,13 @@ void AlgorithmWindow::DiscardGraphicsResources()
     SafeRelease(&pBrush);
 }
 
-int PointOri(D2D1_ELLIPSE p1, D2D1_ELLIPSE p2, D2D1_ELLIPSE p3) {
-    int value = (p2.point.y - p1.point.y) * (p3.point.x - p2.point.x) - (p2.point.x - p1.point.x) * (p3.point.y - p2.point.y);
-
-    if (value == 0) {
-        return 0;
-    }
-    return (value > 0) ? 1 : 2;
-}
-
-int PointDistance(D2D1_ELLIPSE p1, D2D1_ELLIPSE p2) {
-    return (p1.point.x - p2.point.x) * (p1.point.x - p2.point.x) - (p1.point.y - p2.point.y) * (p1.point.y - p2.point.y);
-}
-
 int ComparePoints(const void* vp1, const void* vp2) {
     D2D1_ELLIPSE* p1 = (D2D1_ELLIPSE*)vp1;
     D2D1_ELLIPSE* p2 = (D2D1_ELLIPSE*)vp2;
 
-    int ori = PointOri(first_point, *p1, *p2);
+    int ori = HullMath::PointOri(first_point, *p1, *p2);
     if (ori == 0) {
-        return (PointDistance(first_point, *p2) >= PointDistance(first_point, *p1)) ? -1 : 1;
+        return (HullMath::PointDistance(first_point, *p2) >= HullMath::PointDistance(first_point, *p1)) ? -1 : 1;
     }
     return (ori == 2) ? -1 : 1;
 

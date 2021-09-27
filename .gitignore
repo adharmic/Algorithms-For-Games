@@ -388,3 +388,5 @@ FodyWeavers.xsd
 *.sln.iml
 cpp/.vs/SimpleDrawing/v16/Browse.VC.db
 cpp/.vs/SimpleDrawing/v16/.suo
+cpp/.vs/SimpleDrawing/v16/ipch/AutoPCH/b0a5b279836f83d6/QUICKHULL.ipch
+cpp/.vs/SimpleDrawing/v16/ipch/AutoPCH/f8d4e20d0be58b85/MAIN.ipch
