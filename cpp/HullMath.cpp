@@ -104,12 +104,24 @@ public:
 	5. If it makes a full round with no issues, the point must be in the hull.
 	*/
 	static bool ContainsPoint(vector<D2D1_ELLIPSE> hull, D2D1_ELLIPSE point) {
-		for (int i = hull.size() - 1; i > 0; i--) {
-			if (!isLeft(hull[i], hull[i - 1], point)) {
-				return false;
+		D2D1_ELLIPSE extreme = D2D1::Ellipse(D2D1::Point2F(10000, point.point.y), 10.0f, 10.0f);
+
+		int index = 0;
+		int i = 0;
+
+		do {
+			int next = (i + 1) % hull.size();
+
+			if (LineIntersects(hull[i], hull[next], point, extreme)) {
+				if (PointOri(hull[i], point, hull[next]) == 0) {
+					return onLine(hull[i], point, hull[next]);
+				}
+				index++;
 			}
-		}
-		return isLeft(hull[0], hull[hull.size()-1], point);
+			i = next;
+		} while (i != 0);
+
+		return (index % 2) == 1;
 	}
 
 	/* HullsIntersecting will probably check if any of the points of hull1 are inside hull2. 

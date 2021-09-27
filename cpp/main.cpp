@@ -211,23 +211,6 @@ void MainWindow::Resize()
 
 void MainWindow::OnLButtonDown(int pixelX, int pixelY, DWORD flags)
 {
-    HRESULT hr = CreateGraphicsResources();
-    if (SUCCEEDED(hr))
-    {
-        PAINTSTRUCT ps;
-        BeginPaint(m_hwnd, &ps);
-
-        pRenderTarget->BeginDraw();
-
-        pRenderTarget->Clear(D2D1::ColorF(D2D1::ColorF::White));
-
-        hr = pRenderTarget->EndDraw();
-        if (FAILED(hr) || hr == D2DERR_RECREATE_TARGET)
-        {
-            DiscardGraphicsResources();
-        }
-        EndPaint(m_hwnd, &ps);
-    }
     
     
 }
@@ -250,6 +233,7 @@ class AlgorithmWindow : public BaseWindow<AlgorithmWindow>
     ID2D1HwndRenderTarget* pRenderTarget;
     ID2D1SolidColorBrush* pBrush;
     D2D1_POINT_2F           ptMouse;
+    D2D1_POINT_2F           click_pos;
 
     Mode                    mode;
     size_t                  nextColor;
@@ -299,6 +283,14 @@ class AlgorithmWindow : public BaseWindow<AlgorithmWindow>
     void    RenderEdges(vector<D2D1_ELLIPSE> points);
     void    DrawAxes();
     void    UpdateEllipses();
+    D2D1_ELLIPSE point_convex;
+
+    // Hull being moved
+    vector<D2D1_ELLIPSE> moving_hull;
+
+    // Index of moved hull
+    int move_ind;
+
     vector<D2D1_ELLIPSE> AlgorithmWindow::Translate(vector<D2D1_ELLIPSE> points, int dir);
 
 public:
@@ -376,6 +368,10 @@ HRESULT AlgorithmWindow::CreateGraphicsResources()
             for each (D2D1_ELLIPSE var in hull2) {
                 small_points.push_back(var);
             }
+            point_convex.point.x = pRenderTarget->GetSize().width / 2;
+            point_convex.point.y = pRenderTarget->GetSize().height / 2;
+            InsertEllipse(point_convex.point.x, point_convex.point.y);
+
         }
     }
     return hr;
@@ -450,6 +446,8 @@ void AlgorithmWindow::UpdateEllipses() {
     int index = 0;
     if (current_alg == QHull || current_alg == PointHull) {
         for (auto i = ellipses.begin(); i != ellipses.end(); ++i) {
+            if (index == 10)
+                break;
             (*i)->ellipse.point.x = big_points[index].point.x;
             (*i)->ellipse.point.y = big_points[index].point.y;
             index++;
@@ -457,6 +455,8 @@ void AlgorithmWindow::UpdateEllipses() {
         return;
     }
     for (auto i = ellipses.begin(); i != ellipses.end(); ++i) {
+        if (index == 10)
+            break;
         (*i)->ellipse.point.x = small_points[index].point.x;
         (*i)->ellipse.point.y = small_points[index].point.y;
         index++;
@@ -475,13 +475,19 @@ void AlgorithmWindow::OnPaint()
 
         pRenderTarget->Clear(D2D1::ColorF(D2D1::ColorF::White));
 
+
+        pBrush->SetColor(D2D1::ColorF(D2D1::ColorF::Black));
         vector<D2D1_ELLIPSE> hullpoints;
+
+        int index = 0;
         for (auto i = ellipses.begin(); i != ellipses.end(); ++i)
         {
-            (hullpoints).push_back((*i)->ellipse);
-            pRenderTarget->DrawEllipse((*i)->ellipse, pBrush);
+            if (index != 10) {
+                (hullpoints).push_back((*i)->ellipse);
+                pRenderTarget->DrawEllipse((*i)->ellipse, pBrush);
+            }
+            index++;
         }
-        //RENDERING MINK DIFF
 
         UpdateEllipses();
 
@@ -514,12 +520,24 @@ void AlgorithmWindow::OnPaint()
             vector<D2D1_ELLIPSE> sorted_hull2 = SortPoints(qhull2->GetConvexHull());
             vector<D2D1_ELLIPSE> sorted_hull3 = SortPoints(qhull3->GetConvexHull());
 
+
+            pBrush->SetColor(D2D1::ColorF(D2D1::ColorF::Red));
             RenderEdges(sorted_hull1);
+
+            pBrush->SetColor(D2D1::ColorF(D2D1::ColorF::Blue));
             RenderEdges(sorted_hull2);
+
+
+            if (current_alg == GJK && HullMath::HullsIntersecting(sorted_hull1, sorted_hull2)) {
+                pBrush->SetColor(D2D1::ColorF(D2D1::ColorF::Green));
+            }
+            else {
+                pBrush->SetColor(D2D1::ColorF(D2D1::ColorF::Magenta));
+            }
             RenderEdges(sorted_hull3);
         }
         // RENDERING QUICKHULL
-        if (current_alg == QHull || current_alg == PointHull) {
+        if (current_alg == QHull) {
 
 
             QuickHull* qhull = new QuickHull(hullpoints);
@@ -531,9 +549,39 @@ void AlgorithmWindow::OnPaint()
             RenderEdges(quick_hull_points);
         }
 
+        if (current_alg == PointHull) {
+            QuickHull* qhull = new QuickHull(hullpoints);
+
+            vector<D2D1_ELLIPSE> q_points = (qhull)->GetConvexHull();
+
+            vector<D2D1_ELLIPSE> quick_hull_points = SortPoints(q_points);
+
+            D2D1_ELLIPSE point_check;
+
+            RenderEdges(quick_hull_points);
+
+            int index = 0;
+            for (auto i = ellipses.begin(); i != ellipses.end(); i++) {
+                if (index == 10) {
+                    point_check = (*i)->ellipse;
+                    if (HullMath::ContainsPoint(quick_hull_points, point_check)) {
+                        pBrush->SetColor(D2D1::ColorF(D2D1::ColorF::Red));
+                    }
+                    else {
+                        pBrush->SetColor(D2D1::ColorF(D2D1::ColorF::Green));
+                    }
+                    pRenderTarget->FillEllipse((*i)->ellipse, pBrush);
+                }
+                else {
+                    pRenderTarget->DrawEllipse((*i)->ellipse, pBrush);
+                }
+                index++;
+            }
+        }
+
         if (Selection())
         {
-            pBrush->SetColor(D2D1::ColorF(D2D1::ColorF::Red));
+            pBrush->SetColor(D2D1::ColorF(D2D1::ColorF::Orange));
             pRenderTarget->DrawEllipse(Selection()->ellipse, pBrush, 2.0f);
         }
 
@@ -565,19 +613,40 @@ void AlgorithmWindow::OnLButtonDown(int pixelX, int pixelY, DWORD flags)
 {
     const float dipX = DPIScale::PixelsToDipsX(pixelX);
     const float dipY = DPIScale::PixelsToDipsY(pixelY);
+    click_pos.x = dipX;
+    click_pos.y = dipY;
+    D2D1_ELLIPSE pos;
+    pos.point.x = dipX;
+    pos.point.y = dipY;
 
-    //if (mode == DrawMode)
-    //{
-    //    POINT pt = { pixelX, pixelY };
+    if (current_alg == MinkDiff || current_alg == MinkSum || current_alg == GJK) {
+        QuickHull* qhull1 = new QuickHull(hull1);
+        QuickHull* qhull2 = new QuickHull(hull2);
 
-    //    if (DragDetect(m_hwnd, pt))
-    //    {
-    //        SetCapture(m_hwnd);
-    //    
-    //        // Start a new ellipse.
-    //        InsertEllipse(dipX, dipY);
-    //    }
-    //}
+        vector<D2D1_ELLIPSE> sorted_hull1 = SortPoints(qhull1->GetConvexHull());
+        vector<D2D1_ELLIPSE> sorted_hull2 = SortPoints(qhull2->GetConvexHull());
+
+        if (HullMath::ContainsPoint(sorted_hull1, pos)) {
+            moving_hull = hull1;
+            move_ind = 1;
+        }
+        if (HullMath::ContainsPoint(sorted_hull2, pos)) {
+            moving_hull = hull2;
+            move_ind = 2;
+        }
+    }
+    else {
+        QuickHull* qhull1 = new QuickHull(big_points);
+
+        vector<D2D1_ELLIPSE> sorted_hull1 = SortPoints(qhull1->GetConvexHull());
+
+        if (HullMath::ContainsPoint(sorted_hull1, pos)) {
+            moving_hull = big_points;
+            move_ind = 3;
+        }
+
+    }
+
     ClearSelection();
 
     if (HitTest(dipX, dipY))
@@ -595,12 +664,14 @@ void AlgorithmWindow::OnLButtonDown(int pixelX, int pixelY, DWORD flags)
 
 void AlgorithmWindow::OnLButtonUp()
 {
+    move_ind = 0;
     if ((mode == DrawMode) && Selection())
     {
         ClearSelection();
         InvalidateRect(m_hwnd, NULL, FALSE);
     }
     else if (mode == DragMode)
+
     {
         SetMode(SelectMode);
     }
@@ -635,68 +706,50 @@ void AlgorithmWindow::OnMouseMove(int pixelX, int pixelY, DWORD flags)
         }
         InvalidateRect(m_hwnd, NULL, FALSE);
     }
-    /*else if (flags && MK_LBUTTON) {
-        D2D1_ELLIPSE ellipse;
-        ellipse.point.x = dipX;
-        ellipse.point.y = dipY;
-
-        if (current_alg == QHull || current_alg == PointHull) {
-
-            vector<D2D1_ELLIPSE> hullpoints;
-            for (auto i = ellipses.begin(); i != ellipses.end(); ++i)
-            {
-                (hullpoints).push_back((*i)->ellipse);
+    else if (flags && MK_LBUTTON && move_ind != 0) {
+        int index = 0;
+        vector<D2D1_ELLIPSE> new_points;
+        switch (move_ind) {
+        case 1:
+            for (auto i = ellipses.begin(); i != ellipses.end(); i++) {
+                if (index < 5) {
+                    (*i)->ellipse.point.x = moving_hull[index].point.x + (dipX - click_pos.x);
+                    (*i)->ellipse.point.y = moving_hull[index].point.y + (dipY - click_pos.y);
+                }
+                D2D1_ELLIPSE point1 = D2D1::Ellipse(D2D1::Point2F((*i)->ellipse.point.x, (*i)->ellipse.point.y), 10.0f, 10.0f);
+                new_points.push_back(point1);
+                index++;
             }
-
-            QuickHull* qhull = new QuickHull(big_points);
-
-            vector<D2D1_ELLIPSE> q_points = (qhull)->GetConvexHull();
-
-            vector<D2D1_ELLIPSE> quick_hull_points = SortPoints(q_points);
-
-            if (HullMath::ContainsPoint(quick_hull_points, ellipse)) {
-                vector<D2D1_ELLIPSE> new_points;
-                for (auto i = ellipses.begin(); i != ellipses.end(); i++) {
-                    (*i)->ellipse.point.x = ptMouse.x + dipX;
-                    (*i)->ellipse.point.y = ptMouse.y + dipY;
+            small_points = new_points;
+            break;
+        case 2:
+            for (auto i = ellipses.begin(); i != ellipses.end(); i++) {
+                if (index > 4 && index < 10) {
+                    (*i)->ellipse.point.x = moving_hull[index-5].point.x + (dipX - click_pos.x);
+                    (*i)->ellipse.point.y = moving_hull[index-5].point.y + (dipY - click_pos.y);
+                }
+                D2D1_ELLIPSE point1 = D2D1::Ellipse(D2D1::Point2F((*i)->ellipse.point.x, (*i)->ellipse.point.y), 10.0f, 10.0f);
+                new_points.push_back(point1);
+                index++;
+            }
+            small_points = new_points;
+            break;
+        case 3:
+            for (auto i = ellipses.begin(); i != ellipses.end(); i++) {
+                if (index < 10) {
+                    (*i)->ellipse.point.x = moving_hull[index].point.x + (dipX - click_pos.x);
+                    (*i)->ellipse.point.y = moving_hull[index].point.y + (dipY - click_pos.y);
                     D2D1_ELLIPSE point1 = D2D1::Ellipse(D2D1::Point2F((*i)->ellipse.point.x, (*i)->ellipse.point.y), 10.0f, 10.0f);
                     new_points.push_back(point1);
                 }
-                big_points = new_points;
+                index++;
             }
+            big_points = new_points;
+            break;
+        default:
+            break;
         }
-        else {
-            QuickHull* qhull = new QuickHull(hull1);
-            QuickHull* qhull2 = new QuickHull(hull2);
-
-            vector<D2D1_ELLIPSE> q_points = (qhull)->GetConvexHull();
-            vector<D2D1_ELLIPSE> q_points2 = (qhull2)->GetConvexHull();
-
-            vector<D2D1_ELLIPSE> quick_hull_points = SortPoints(q_points);
-            vector<D2D1_ELLIPSE> quick_hull_points2 = SortPoints(q_points2);
-
-            if (HullMath::ContainsPoint(quick_hull_points, ellipse)) {
-                for (int i = 0; i < 5; i++) {
-                    auto j = ellipses.begin();
-                    (*j)->ellipse.point.x = ptMouse.x + dipX;
-                    (*j)->ellipse.point.y = ptMouse.y + dipY;
-                    D2D1_ELLIPSE point1 = D2D1::Ellipse(D2D1::Point2F((*j)->ellipse.point.x, (*j)->ellipse.point.y), 10.0f, 10.0f);
-                    small_points[i] = point1;
-                    j++;
-                }
-            }
-            if (HullMath::ContainsPoint(quick_hull_points, ellipse)) {
-                for (int i = 0; i < 5; i++) {
-                    auto j = ellipses.begin();
-                    (*j)->ellipse.point.x = ptMouse.x + dipX;
-                    (*j)->ellipse.point.y = ptMouse.y + dipY;
-                    D2D1_ELLIPSE point1 = D2D1::Ellipse(D2D1::Point2F((*j)->ellipse.point.x, (*j)->ellipse.point.y), 10.0f, 10.0f);
-                    small_points[i + 5] = point1;
-                    j++;
-                }
-            }
-        }
-    }*/
+    }
 }
 
 void AlgorithmWindow::OnKeyDown(UINT vkey)
