@@ -106,13 +106,13 @@ class MainWindow : public BaseWindow<MainWindow>
     void    DiscardGraphicsResources();
     void    OnPaint();
     void    Resize();
-    //void    OnLButtonDown(int pixelX, int pixelY, DWORD flags);
+    void    OnLButtonDown(int pixelX, int pixelY, DWORD flags);
     //void    OnLButtonUp();
 
 public:
 
-    MainWindow() : pFactory(NULL), pRenderTarget(NULL), pBrush(NULL)
-        //ptMouse(D2D1::Point2F()), nextColor(0)
+    MainWindow() : pFactory(NULL), pRenderTarget(NULL), pBrush(NULL),
+        ptMouse(D2D1::Point2F()), nextColor(0)
         //, selection(ellipses.end())
     {
     }
@@ -200,6 +200,28 @@ void MainWindow::Resize()
     }
 }
 
+void MainWindow::OnLButtonDown(int pixelX, int pixelY, DWORD flags)
+{
+    HRESULT hr = CreateGraphicsResources();
+    if (SUCCEEDED(hr))
+    {
+        PAINTSTRUCT ps;
+        BeginPaint(m_hwnd, &ps);
+
+        pRenderTarget->BeginDraw();
+
+        pRenderTarget->Clear(D2D1::ColorF(D2D1::ColorF::White));
+
+        hr = pRenderTarget->EndDraw();
+        if (FAILED(hr) || hr == D2DERR_RECREATE_TARGET)
+        {
+            DiscardGraphicsResources();
+        }
+        EndPaint(m_hwnd, &ps);
+    }
+    
+    
+}
 
 
 //Button 1 window
@@ -275,12 +297,44 @@ void Button1Window::DiscardGraphicsResources()
 
 void Button1Window::OnLButtonDown(int pixelX, int pixelY, DWORD flags)
 {
-    
-    
+    HRESULT hr = CreateGraphicsResources();
+    if (SUCCEEDED(hr))
+    {
+        PAINTSTRUCT ps;
+        BeginPaint(m_hwnd, &ps);
+
+        pRenderTarget->BeginDraw();
+
+        pRenderTarget->Clear(D2D1::ColorF(D2D1::ColorF::White));
+
+        hr = pRenderTarget->EndDraw();
+        if (FAILED(hr) || hr == D2DERR_RECREATE_TARGET)
+        {
+            DiscardGraphicsResources();
+        }
+        EndPaint(m_hwnd, &ps);
+    }
 }
 
 void Button1Window::OnLButtonUp()
 {
+    HRESULT hr = CreateGraphicsResources();
+    if (SUCCEEDED(hr))
+    {
+        PAINTSTRUCT ps;
+        BeginPaint(m_hwnd, &ps);
+
+        pRenderTarget->BeginDraw();
+
+        pRenderTarget->Clear(D2D1::ColorF(D2D1::ColorF::Black));
+
+        hr = pRenderTarget->EndDraw();
+        if (FAILED(hr) || hr == D2DERR_RECREATE_TARGET)
+        {
+            DiscardGraphicsResources();
+        }
+        EndPaint(m_hwnd, &ps);
+    }
 }
 
 void Button1Window::OnPaint()
@@ -393,8 +447,23 @@ void Button2Window::DiscardGraphicsResources()
 
 void Button2Window::OnLButtonDown(int pixelX, int pixelY, DWORD flags)
 {
+    HRESULT hr = CreateGraphicsResources();
+    if (SUCCEEDED(hr))
+    {
+        PAINTSTRUCT ps;
+        BeginPaint(m_hwnd, &ps);
 
+        pRenderTarget->BeginDraw();
 
+        pRenderTarget->Clear(D2D1::ColorF(D2D1::ColorF::White));
+
+        hr = pRenderTarget->EndDraw();
+        if (FAILED(hr) || hr == D2DERR_RECREATE_TARGET)
+        {
+            DiscardGraphicsResources();
+        }
+        EndPaint(m_hwnd, &ps);
+    }
 }
 
 void Button2Window::OnLButtonUp()
@@ -500,8 +569,23 @@ void Button3Window::DiscardGraphicsResources()
 
 void Button3Window::OnLButtonDown(int pixelX, int pixelY, DWORD flags)
 {
+    HRESULT hr = CreateGraphicsResources();
+    if (SUCCEEDED(hr))
+    {
+        PAINTSTRUCT ps;
+        BeginPaint(m_hwnd, &ps);
 
+        pRenderTarget->BeginDraw();
 
+        pRenderTarget->Clear(D2D1::ColorF(D2D1::ColorF::White));
+
+        hr = pRenderTarget->EndDraw();
+        if (FAILED(hr) || hr == D2DERR_RECREATE_TARGET)
+        {
+            DiscardGraphicsResources();
+        }
+        EndPaint(m_hwnd, &ps);
+    }
 }
 
 void Button3Window::OnLButtonUp()
@@ -598,8 +682,23 @@ void Button4Window::DiscardGraphicsResources()
 
 void Button4Window::OnLButtonDown(int pixelX, int pixelY, DWORD flags)
 {
+    HRESULT hr = CreateGraphicsResources();
+    if (SUCCEEDED(hr))
+    {
+        PAINTSTRUCT ps;
+        BeginPaint(m_hwnd, &ps);
 
+        pRenderTarget->BeginDraw();
 
+        pRenderTarget->Clear(D2D1::ColorF(D2D1::ColorF::White));
+
+        hr = pRenderTarget->EndDraw();
+        if (FAILED(hr) || hr == D2DERR_RECREATE_TARGET)
+        {
+            DiscardGraphicsResources();
+        }
+        EndPaint(m_hwnd, &ps);
+    }
 }
 
 void Button4Window::OnLButtonUp()
@@ -705,8 +804,23 @@ void Button5Window::DiscardGraphicsResources()
 
 void Button5Window::OnLButtonDown(int pixelX, int pixelY, DWORD flags)
 {
+    HRESULT hr = CreateGraphicsResources();
+    if (SUCCEEDED(hr))
+    {
+        PAINTSTRUCT ps;
+        BeginPaint(m_hwnd, &ps);
 
+        pRenderTarget->BeginDraw();
 
+        pRenderTarget->Clear(D2D1::ColorF(D2D1::ColorF::White));
+
+        hr = pRenderTarget->EndDraw();
+        if (FAILED(hr) || hr == D2DERR_RECREATE_TARGET)
+        {
+            DiscardGraphicsResources();
+        }
+        EndPaint(m_hwnd, &ps);
+    }
 }
 
 void Button5Window::OnLButtonUp()
@@ -774,7 +888,7 @@ class AlgorithmWindow : public BaseWindow<AlgorithmWindow>
     }
 
     void    ClearSelection() { selection = ellipses.end(); }
-    HRESULT InsertEllipse(float x, float y);
+    //HRESULT InsertEllipse(float x, float y);
 
     /*MyEllipse PointFarthestFromEdge(MyEllipse a, MyEllipse b, list<shared_ptr<MyEllipse>> p);
     bool    Contains(list<MyEllipse> points, MyEllipse to_be_found);*/
@@ -798,6 +912,7 @@ public:
     {
     }
 
+    HRESULT InsertEllipse(float x, float y);
     PCWSTR  ClassName() const { return L"Circle Window Class"; }
     LRESULT HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam);
 };
@@ -1157,7 +1272,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
     // But 1
     Button1Window button1;
 
-    if (!button1.Create(L"Button 1", BS_PUSHBUTTON | WS_VISIBLE | WS_CHILD | WS_BORDER,
+    if (!button1.Create(L"Button 1", WS_VISIBLE | WS_CHILD | WS_BORDER,
         10, 30, 100, 50, win.Window()))
     {
         return 0;
@@ -1336,10 +1451,10 @@ LRESULT Button1Window::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
         break;
 
     case WM_LBUTTONDOWN:
-    {
-        //OnLButtonDown(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), (DWORD)wParam);
+        
+        OnLButtonDown(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), (DWORD)wParam);
         return 0;
-    }
+    
     case WM_LBUTTONUP:
         OnLButtonUp();
         return 0;
@@ -1641,11 +1756,12 @@ LRESULT MainWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
         Resize();
         return 0;
 
-    /*case WM_LBUTTONDOWN:
+    case WM_LBUTTONDOWN:
+    {
         OnLButtonDown(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), (DWORD)wParam);
         return 0;
-
-    case WM_LBUTTONUP:
+    }
+    /*case WM_LBUTTONUP:
         OnLButtonUp();
         return 0;*/
 
